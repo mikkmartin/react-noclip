@@ -10,8 +10,7 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf .next"
   },
   "dependencies": {
-    "@noclip/core": "workspace:*",
-    "@noclip/utils": "workspace:*",
+    "react-noclip": "workspace:*",
     "next": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

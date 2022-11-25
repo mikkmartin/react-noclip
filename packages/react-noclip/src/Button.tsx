@@ -1,3 +1,4 @@
+import styled from "@emotion/styled";
 import * as React from "react";
 
 export interface ButtonProps {
@@ -5,7 +6,9 @@ export interface ButtonProps {
 }
 
 export function Button(props: ButtonProps) {
-  return <button>{props.children}</button>;
+  return <Container>{props.children}</Container>;
 }
 
-Button.displayName = "Button";
+const Container = styled.button`
+  background: pink;
+`;
