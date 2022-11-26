@@ -58,6 +58,7 @@ importers:
 
   packages/react-noclip:
     specifiers:
+      '@emotion/react': ^11.10.5
       '@emotion/styled': ^11.10.5
       '@noclip/tsconfig': workspace:*
       '@radix-ui/react-popover': ^1.0.2
@@ -66,22 +67,23 @@ importers:
       cmdk: ^0.1.20
       eslint: ^8.28.0
       eslint-config-noclip: workspace:*
-      react: ^18.2.0
-      react-dom: ^18.2.0
+      react: ^16.8 || ^17.0 || ^18.0
+      react-dom: ^16.8 || ^17.0 || ^18.0
       tsup: ^6.5.0
       typescript: ^4.9.3
     dependencies:
+      '@emotion/react': 11.10.5_cuziicjcvwawlf5iuhzacuhqcy
       '@emotion/styled': 11.10.5_hmjty4frusbltjhl3xd7udcm2y
       '@radix-ui/react-popover': 1.0.2_2zx2umvpluuhvlq44va5bta2da
       cmdk: 0.1.20_2zx2umvpluuhvlq44va5bta2da
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
     devDependencies:
       '@noclip/tsconfig': link:../noclip-tsconfig
       '@types/react': 18.0.25
       '@types/react-dom': 18.0.9
       eslint: 8.28.0
       eslint-config-noclip: link:../eslint-config-acme
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
       tsup: 6.5.0_typescript@4.9.3
       typescript: 4.9.3
 
@@ -3122,6 +3124,7 @@ packages:
     hasBin: true
     dependencies:
       js-tokens: 4.0.0
+    dev: false
 
   /lru-cache/4.1.5:
     resolution: {integrity: sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==}
@@ -3574,6 +3577,7 @@ packages:
       loose-envify: 1.4.0
       react: 18.2.0
       scheduler: 0.23.0
+    dev: false
 
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -3655,6 +3659,7 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       loose-envify: 1.4.0
+    dev: false
 
   /read-pkg-up/7.0.1:
     resolution: {integrity: sha512-zK0TB7Xd6JpCLmlLmufqykGE+/TlOePD6qKClNW7hHDKFh/J7/7gCWGR7joEQEW1bKq3a3yUZSObOoWLFQ4ohg==}
@@ -3788,6 +3793,7 @@ packages:
     resolution: {integrity: sha512-CtuThmgHNg7zIZWAXi3AsyIzA3n4xx7aNyjwC2VJldO2LMVDhFK+63xGqq6CsJH4rTAt6/M+N4GhZiDYPx9eUw==}
     dependencies:
       loose-envify: 1.4.0
+    dev: false
 
   /semver/5.7.1:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
