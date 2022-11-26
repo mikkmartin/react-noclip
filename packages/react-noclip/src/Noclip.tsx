@@ -258,7 +258,7 @@ function SubCommand({
       <Popover.Content
         side="top"
         align="end"
-        sideOffset={16}
+        sideOffset={12}
         alignOffset={0}
         onCloseAutoFocus={(e) => {
           e.preventDefault();
@@ -284,6 +284,7 @@ const SubCommandContainer = styled(Command)`
   box-shadow: none;
   border: 1px solid var(--gray6);
   background-color: var(--gray1);
+  border-radius: 8px;
 `;
 
 const SubItem = styled(Item)`
