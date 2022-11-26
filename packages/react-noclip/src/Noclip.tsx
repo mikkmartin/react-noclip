@@ -13,7 +13,8 @@ type ModalProps = {
 };
 
 export function Noclip({ content, onUnmount }: ModalProps) {
-  const [value, setValue] = React.useState("linear");
+  const firstValue = formatValue(Object.keys(content)[0]);
+  const [value, setValue] = React.useState(firstValue);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
 
@@ -21,18 +22,28 @@ export function Noclip({ content, onUnmount }: ModalProps) {
     inputRef?.current?.focus();
   }, []);
 
+  function formatValue(value: string) {
+    return value.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
+  }
+
+  const renderContent = () =>
+    Object.keys(content).map((key) => {
+      const value = formatValue(key);
+      return (
+        <Item key={key} value={value} onSelect={() => content[key]()}>
+          <span>{value}</span>
+          <span className="accessory">{typeof content[key]}</span>
+        </Item>
+      );
+    });
+
   return (
     <Dialog open={true} onOpenChange={(state) => !state && onUnmount()}>
-      <Command value={value} onValueChange={(v) => setValue(v)}>
-        <div cmdk-raycast-top-shine="" />
+      <Command value={value} onValueChange={setValue}>
         <Input ref={inputRef} autoFocus placeholder="Type a command..." />
         <List ref={listRef}>
           <Empty>No results found.</Empty>
-          <Item value="Linear">Linear</Item>
-          <Item value="Figma">Figma</Item>
-          <Item value="Slack">Slack</Item>
-          <Item value="YouTube">YouTube</Item>
-          <Item value="Raycast">Raycast</Item>
+          {renderContent()}
         </List>
 
         <Footer>
@@ -147,6 +158,9 @@ const Group = styled(CommandBase.Group)`
     color: var(--gray11);
     padding: 8px 4px;
     padding-top: 4px;
+    &::first-letter {
+      text-transform: uppercase;
+    }
   }
 `;
 
@@ -172,6 +186,8 @@ const List = styled(CommandBase.List)`
 
 const Item = styled(CommandBase.Item)`
   content-visibility: auto;
+  display: flex;
+  justify-content: space-between;
 
   cursor: pointer;
   height: 48px;
@@ -186,6 +202,14 @@ const Item = styled(CommandBase.Item)`
   will-change: background, color;
   transition: all 150ms ease;
   transition-property: none;
+
+  span:first-of-type:first-letter {
+    text-transform: uppercase;
+  }
+
+  span:last-of-type {
+    color: var(--gray9);
+  }
 
   &[aria-selected="true"] {
     background: var(--grayA3);
@@ -258,7 +282,7 @@ function SubCommand({
       <Popover.Content
         side="top"
         align="end"
-        sideOffset={12}
+        sideOffset={14}
         alignOffset={0}
         onCloseAutoFocus={(e) => {
           e.preventDefault();
