@@ -28,26 +28,11 @@ export function Noclip({ content, onUnmount }: ModalProps) {
         <Input ref={inputRef} autoFocus placeholder="Type a command..." />
         <List ref={listRef}>
           <Empty>No results found.</Empty>
-          <Group heading="Suggestions">
-            <Item value="Linear">Linear</Item>
-            <Item value="Figma">Figma</Item>
-            <Item value="Slack">Slack</Item>
-            <Item value="YouTube">YouTube</Item>
-            <Item value="Raycast">Raycast</Item>
-          </Group>
-          <Group heading="Commands">
-            <Item isCommand value="Clipboard History">
-              Clipboard History
-            </Item>
-            <Item isCommand value="Import Extension">
-              <HammerIcon />
-              Import Extension
-            </Item>
-            <Item isCommand value="Manage Extensions">
-              <HammerIcon />
-              Manage Extensions
-            </Item>
-          </Group>
+          <Item value="Linear">Linear</Item>
+          <Item value="Figma">Figma</Item>
+          <Item value="Slack">Slack</Item>
+          <Item value="YouTube">YouTube</Item>
+          <Item value="Raycast">Raycast</Item>
         </List>
 
         <Footer>
@@ -126,8 +111,8 @@ const Empty = styled(CommandBase.Empty)`
 `;
 
 const List = styled(CommandBase.List)`
-  height: min(330px, calc(var(--cmdk-list-height)));
-  padding: 0 8px 8px;
+  height: min(330px, calc(var(--cmdk-list-height) + 16px));
+  padding: 8px;
   max-height: 400px;
   overflow: auto;
   overscroll-behavior: contain;
@@ -135,23 +120,7 @@ const List = styled(CommandBase.List)`
   transition-property: height;
 `;
 
-function Item({
-  children,
-  value,
-}: {
-  children: React.ReactNode;
-  value: string;
-  isCommand?: boolean;
-}) {
-  return (
-    <StyledItem value={value} onSelect={() => {}}>
-      {children}
-      <span>Command</span>
-    </StyledItem>
-  );
-}
-
-const StyledItem = styled(CommandBase.Item)`
+const Item = styled(CommandBase.Item)`
   content-visibility: auto;
 
   cursor: pointer;
@@ -185,11 +154,6 @@ const StyledItem = styled(CommandBase.Item)`
 
   & + [cmdk-item] {
     margin-top: 4px;
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
   }
 `;
 
@@ -284,27 +248,5 @@ function SubItem({
           })}
       </div>
     </CommandBase.Item>
-  );
-}
-
-function HammerIcon() {
-  return (
-    <div cmdk-raycast-hammer-icon="">
-      <svg
-        width="32"
-        height="32"
-        viewBox="0 0 16 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M6.73762 6.19288L2.0488 11.2217C1.6504 11.649 1.6504 12.3418 2.0488 12.769L3.13083 13.9295C3.52923 14.3568 4.17515 14.3568 4.57355 13.9295L9.26238 8.90071M6.73762 6.19288L7.0983 5.80605C7.4967 5.37877 7.4967 4.686 7.0983 4.25872L6.01627 3.09822L6.37694 2.71139C7.57213 1.42954 9.50991 1.42954 10.7051 2.71139L13.9512 6.19288C14.3496 6.62017 14.3496 7.31293 13.9512 7.74021L12.8692 8.90071C12.4708 9.328 11.8248 9.328 11.4265 8.90071L11.0658 8.51388C10.6674 8.0866 10.0215 8.0866 9.62306 8.51388L9.26238 8.90071M6.73762 6.19288L9.26238 8.90071"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
   );
 }
