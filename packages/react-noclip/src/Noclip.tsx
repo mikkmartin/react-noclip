@@ -140,7 +140,15 @@ const Footer = styled.div`
   }
 `;
 
-const Group = styled(CommandBase.Group)``;
+const Group = styled(CommandBase.Group)`
+  [cmdk-group-heading] {
+    user-select: none;
+    font-size: 12px;
+    color: var(--gray11);
+    padding: 8px 4px;
+    padding-top: 4px;
+  }
+`;
 
 const Empty = styled(CommandBase.Empty)`
   font-size: 14px;
@@ -192,10 +200,6 @@ const Item = styled(CommandBase.Item)`
   &:active {
     transition-property: background;
     background: var(--gray4);
-  }
-
-  & + [cmdk-item] {
-    margin-top: 4px;
   }
 `;
 
@@ -261,36 +265,36 @@ function SubCommand({
           inputRef?.current?.focus();
         }}
       >
-        <Command>
+        <SubCommandContainer>
           <List>
             <Group heading={selectedValue}>
-              <SubItem shortcut="↵">Run action</SubItem>
+              <SubItem>Run action</SubItem>
               <SubItem>Assign shortcut</SubItem>
             </Group>
           </List>
-          <Input placeholder="Search for actions..." />
-        </Command>
+          <SubInput placeholder="Search for actions..." />
+        </SubCommandContainer>
       </Popover.Content>
     </Popover.Root>
   );
 }
 
-function SubItem({
-  children,
-  shortcut,
-}: {
-  children: React.ReactNode;
-  shortcut?: string;
-}) {
-  return (
-    <Item>
-      {children}
-      <div cmdk-raycast-submenu-shortcuts="">
-        {shortcut &&
-          shortcut.split(" ").map((key) => {
-            return <kbd key={key}>{key}</kbd>;
-          })}
-      </div>
-    </Item>
-  );
-}
+const SubCommandContainer = styled(Command)`
+  width: 320px;
+  box-shadow: none;
+  border: 1px solid var(--gray6);
+  background-color: var(--gray1);
+`;
+
+const SubItem = styled(Item)`
+  height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+`;
+
+const SubInput = styled(Input)`
+  padding: 12px;
+  border-top: 1px solid var(--gray6);
+  border-bottom: none;
+  font-size: 13px;
+`;
