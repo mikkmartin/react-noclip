@@ -111,7 +111,7 @@ const Footer = styled.div`
   align-items: center;
   width: 100%;
   background: var(--gray1);
-  padding: 8px;
+  padding: 4px 8px;
   border-top: 1px solid var(--gray6);
   border-radius: 0 0 12px 12px;
   button {
