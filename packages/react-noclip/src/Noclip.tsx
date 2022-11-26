@@ -36,7 +36,7 @@ export function Noclip({ content, onUnmount }: ModalProps) {
         </List>
 
         <Footer>
-          <button cmdk-raycast-open-trigger="">
+          <button>
             Run action
             <kbd>↵</kbd>
           </button>
@@ -68,6 +68,24 @@ const Command = styled(CommandBase)`
   font-family: var(--font-sans);
   box-shadow: var(--cmdk-shadow);
   transition: transform 100ms ease;
+
+  kbd {
+    font-family: var(--font-sans);
+    background: rgba(0, 0, 0, 0.065);
+    color: var(--gray11);
+    height: 20px;
+    width: 20px;
+    border-radius: 4px;
+    padding: 0 4px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:first-of-type {
+      margin-left: 4px;
+    }
+  }
 `;
 
 const Input = styled(CommandBase.Input)`
@@ -96,6 +114,30 @@ const Footer = styled.div`
   padding: 8px;
   border-top: 1px solid var(--gray6);
   border-radius: 0 0 12px 12px;
+  button {
+    font-family: inherit;
+    background: none;
+    border: 0;
+    color: var(--gray11);
+    cursor: pointer;
+
+    padding: 0 4px 0 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 12px;
+    height: 28px;
+    letter-spacing: -0.25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+
+    &[aria-expanded="true"],
+    &:hover {
+      background: var(--gray4);
+    }
+  }
 `;
 
 const Group = styled(CommandBase.Group)``;
@@ -173,6 +215,9 @@ function SubCommand({
       if (e.key === "k" && e.metaKey) {
         e.preventDefault();
         setOpen((o) => !o);
+      } else if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpen(false);
       }
     }
 
@@ -209,7 +254,6 @@ function SubCommand({
       <Popover.Content
         side="top"
         align="end"
-        className="raycast-submenu"
         sideOffset={16}
         alignOffset={0}
         onCloseAutoFocus={(e) => {
@@ -218,13 +262,13 @@ function SubCommand({
         }}
       >
         <Command>
-          <CommandBase.List>
+          <List>
             <Group heading={selectedValue}>
               <SubItem shortcut="↵">Run action</SubItem>
               <SubItem>Assign shortcut</SubItem>
             </Group>
-          </CommandBase.List>
-          <CommandBase.Input placeholder="Search for actions..." />
+          </List>
+          <Input placeholder="Search for actions..." />
         </Command>
       </Popover.Content>
     </Popover.Root>
@@ -239,7 +283,7 @@ function SubItem({
   shortcut?: string;
 }) {
   return (
-    <CommandBase.Item>
+    <Item>
       {children}
       <div cmdk-raycast-submenu-shortcuts="">
         {shortcut &&
@@ -247,6 +291,6 @@ function SubItem({
             return <kbd key={key}>{key}</kbd>;
           })}
       </div>
-    </CommandBase.Item>
+    </Item>
   );
 }
