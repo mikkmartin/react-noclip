@@ -4,19 +4,156 @@ import { Command as CommandBase } from "cmdk";
 import * as React from "react";
 import { styleVars } from "./styles";
 
-export type Content = {
-  [key: string]: Function;
+type OnSubmit = (value: Object) => void;
+
+type Form = {
+  [key: string]: "text-area" | "text-input" | OnSubmit | undefined;
+  onSubmit?: OnSubmit;
 };
+
+export type Content = {
+  [key: string]: Function | Form;
+};
+
 type ModalProps = {
   content: Content;
   [key: string]: any;
 };
+
+function FormView({ form, onBack }: { form: Form; onBack?: Function }) {
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Enter" && e.metaKey) {
+      e.preventDefault();
+      if (!formRef.current) return;
+      const formData = new FormData(formRef.current);
+      const values = Object.keys(form).reduce((acc, key) => {
+        if (typeof form[key] === "function") return acc;
+        return { ...acc, [key]: formData.get(key) };
+      }, {});
+      if (form.onSubmit) form.onSubmit(values);
+    }
+  };
+
+  React.useEffect(() => {
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  React.useEffect(() => {
+    if (!formRef.current) return;
+    const input = formRef.current.querySelector("input");
+    if (input) input.focus();
+  }, []);
+
+  return (
+    <>
+      <BackHeader onClick={() => onBack && onBack()} />
+      <FormContainer ref={formRef}>
+        {Object.keys(form).map((key) => {
+          if (form[key] === "text-area") {
+            return (
+              <React.Fragment key={key}>
+                <label>{key}</label>
+                <textarea name={key} />
+                <div />
+              </React.Fragment>
+            );
+          }
+          if (form[key] === "text-input") {
+            return (
+              <React.Fragment key={key}>
+                <label>{key}</label>
+                <input name={key} />
+                <div />
+              </React.Fragment>
+            );
+          }
+          return null;
+        })}
+      </FormContainer>
+    </>
+  );
+}
+
+const FormContainer = styled.form`
+  display: grid;
+  padding: 2rem;
+  gap: 0.5rem;
+  column-gap: 1rem;
+  grid-template-columns: 1fr 2fr 1fr;
+  place-content: center;
+  height: min(330px, calc(var(--cmdk-list-height) + 16px));
+  label {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--gray11);
+    line-height: 32px;
+    letter-spacing: 0.5px;
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
+  input,
+  textarea {
+    border: 1px solid var(--gray9);
+    min-height: 32px;
+    border-radius: 4px;
+    padding: 8px;
+  }
+  textarea {
+    min-height: 100px;
+    resize: none;
+    font-family: inherit;
+  }
+`;
+
+function BackHeader({ onClick }: any) {
+  return (
+    <StyledBackHeader>
+      <button onClick={onClick}>
+        <IconChevron />
+      </button>
+    </StyledBackHeader>
+  );
+}
+
+const StyledBackHeader = styled.div`
+  height: 54px;
+  display: flex;
+  border-bottom: 1px solid var(--gray6);
+  padding-left: 8px;
+`;
+
+function IconChevron({ direction }: { direction?: "left" | "right" }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      style={{
+        transform: direction === "left" ? "rotate(180deg)" : undefined,
+      }}
+    >
+      <path d="M15 18L9 12 15 6"></path>
+    </svg>
+  );
+}
 
 export function Noclip({ content, onUnmount }: ModalProps) {
   const firstValue = formatValue(Object.keys(content)[0]);
   const [value, setValue] = React.useState(firstValue);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
+  const [pages, setPages] = React.useState<string[]>([]);
+  const isHome = pages.length === 0;
 
   React.useEffect(() => {
     inputRef?.current?.focus();
@@ -29,8 +166,12 @@ export function Noclip({ content, onUnmount }: ModalProps) {
   const renderContent = () =>
     Object.keys(content).map((key) => {
       const value = formatValue(key);
+      const action: Function =
+        typeof content[key] === "function"
+          ? (content[key] as Function)
+          : () => setPages([...pages, key]);
       return (
-        <Item key={key} value={value} onSelect={() => content[key]()}>
+        <Item key={key} value={value} onSelect={() => action()}>
           <span>{value}</span>
           <span className="accessory">{typeof content[key]}</span>
         </Item>
@@ -40,11 +181,21 @@ export function Noclip({ content, onUnmount }: ModalProps) {
   return (
     <Dialog open={true} onOpenChange={(state) => !state && onUnmount()}>
       <Command value={value} onValueChange={setValue}>
-        <Input ref={inputRef} autoFocus placeholder="Type a command..." />
-        <List ref={listRef}>
-          <Empty>No results found.</Empty>
-          {renderContent()}
-        </List>
+        {isHome && (
+          <Input ref={inputRef} autoFocus placeholder="Type a command..." />
+        )}
+        {isHome && (
+          <List ref={listRef}>
+            <Empty>No results found.</Empty>
+            {renderContent()}
+          </List>
+        )}
+        {!isHome && (
+          <FormView
+            form={content[pages[0]] as Form}
+            onBack={() => setPages(pages.slice(0, -1))}
+          />
+        )}
 
         <Footer>
           <button>
@@ -79,6 +230,14 @@ const Command = styled(CommandBase)`
   font-family: var(--font-sans);
   box-shadow: var(--cmdk-shadow);
   transition: transform 100ms ease;
+
+  button {
+    font-family: inherit;
+    background: none;
+    border: 0;
+    color: var(--gray11);
+    cursor: pointer;
+  }
 
   kbd {
     font-family: var(--font-sans);
@@ -126,12 +285,6 @@ const Footer = styled.div`
   border-top: 1px solid var(--gray6);
   border-radius: 0 0 12px 12px;
   button {
-    font-family: inherit;
-    background: none;
-    border: 0;
-    color: var(--gray11);
-    cursor: pointer;
-
     padding: 0 4px 0 8px;
     border-radius: 6px;
     font-weight: 500;
