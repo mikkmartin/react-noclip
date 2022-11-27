@@ -173,7 +173,9 @@ export function Noclip({ content, onUnmount }: ModalProps) {
       return (
         <Item key={key} value={value} onSelect={() => action()}>
           <span>{value}</span>
-          <span className="accessory">{typeof content[key]}</span>
+          <span className="accessory">
+            {typeof content[key] === "function" ? "action" : "form"}
+          </span>
         </Item>
       );
     });

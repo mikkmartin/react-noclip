@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { render } from "react-dom";
 import * as ReactDOMClient from "react-dom/client";
 import { Content, Noclip } from "./Noclip";
 
@@ -13,6 +14,11 @@ export function useNoclip(content: Content) {
     domNodeRef.current.id = "noclip";
     document.body.appendChild(domNodeRef.current);
     rootNodeRef.current = ReactDOMClient.createRoot(domNodeRef.current);
+    render();
+  }
+
+  function render() {
+    if (!rootNodeRef.current) return;
     rootNodeRef.current.render(
       <Noclip
         domNode={domNodeRef.current}
@@ -31,13 +37,12 @@ export function useNoclip(content: Content) {
   }
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "k" && e.metaKey) {
-      if (!mountedRef.current) mount();
-    }
+    if (e.key === "k" && e.metaKey && !mountedRef.current) mount();
   };
 
   useEffect(() => {
     document.addEventListener("keydown", onKeyDown);
+    if (mountedRef.current) render();
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [content]);
 }
