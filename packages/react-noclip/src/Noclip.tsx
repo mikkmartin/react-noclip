@@ -216,6 +216,10 @@ export function Noclip({ content, onUnmount }: ModalProps) {
 }
 
 const Dialog = styled(CommandBase.Dialog)`
+  all: revert;
+  * {
+    all: revert;
+  }
   position: fixed;
   top: 50%;
   left: 50%;

@@ -18,6 +18,7 @@ importers:
 
   apps/test:
     specifiers:
+      '@emotion/react': ^11.10.5
       '@noclip/tsconfig': workspace:*
       '@types/node': ^17.0.12
       '@types/react': ^18.0.22
@@ -29,7 +30,8 @@ importers:
       react-noclip: workspace:*
       typescript: ^4.5.4
     dependencies:
-      next: 13.0.5_biqbaboplfbrettd7655fr4n2y
+      '@emotion/react': 11.10.5_cuziicjcvwawlf5iuhzacuhqcy
+      next: 13.0.5_mqvh5p7ejg4taogoj6tpk3gd5a
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-noclip: link:../../packages/react-noclip
@@ -3243,7 +3245,7 @@ packages:
   /natural-compare/1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
-  /next/13.0.5_biqbaboplfbrettd7655fr4n2y:
+  /next/13.0.5_mqvh5p7ejg4taogoj6tpk3gd5a:
     resolution: {integrity: sha512-awpc3DkphyKydwCotcBnuKwh6hMqkT5xdiBK4OatJtOZurDPBYLP62jtM2be/4OunpmwIbsS0Eyv+ZGU97ciEg==}
     engines: {node: '>=14.6.0'}
     hasBin: true
@@ -3267,7 +3269,7 @@ packages:
       postcss: 8.4.14
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      styled-jsx: 5.1.0_react@18.2.0
+      styled-jsx: 5.1.0_3lzqd2prgnu7gkxqqdmtvzna5u
     optionalDependencies:
       '@next/swc-android-arm-eabi': 13.0.5
       '@next/swc-android-arm64': 13.0.5
@@ -3985,7 +3987,7 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  /styled-jsx/5.1.0_react@18.2.0:
+  /styled-jsx/5.1.0_3lzqd2prgnu7gkxqqdmtvzna5u:
     resolution: {integrity: sha512-/iHaRJt9U7T+5tp6TRelLnqBqiaIT0HsO0+vgyj8hK2KUk7aejFqRrumqPUlAqDwAj8IbS/1hk3IhBAAK/FCUQ==}
     engines: {node: '>= 12.0.0'}
     peerDependencies:
@@ -3998,6 +4000,7 @@ packages:
       babel-plugin-macros:
         optional: true
     dependencies:
+      '@babel/core': 7.20.2
       client-only: 0.0.1
       react: 18.2.0
     dev: false

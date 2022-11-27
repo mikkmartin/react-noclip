@@ -10,10 +10,11 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf .next"
   },
   "dependencies": {
-    "react-noclip": "workspace:*",
+    "@emotion/react": "^11.10.5",
     "next": "latest",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-noclip": "workspace:*"
   },
   "devDependencies": {
     "@noclip/tsconfig": "workspace:*",
