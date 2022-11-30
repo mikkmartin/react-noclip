@@ -18,7 +18,6 @@ export type Content = {
 
 type ModalProps = {
   content: Content;
-  [key: string]: any;
 };
 
 function FormView({ form, onBack }: { form: Form; onBack: Function }) {
@@ -52,8 +51,16 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
   }, []);
 
   return (
-    <Dialog.Root defaultOpen onOpenChange={(state) => !state && onBack()}>
-      <Dialog.Content asChild onOpenAutoFocus={(e) => e.preventDefault()}>
+    <Dialog.Root
+      defaultOpen
+      onOpenChange={(state) => !state && onBack()}
+      modal={false}
+    >
+      <Dialog.Content
+        asChild
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onInteractOutside={(ev) => ev.preventDefault()}
+      >
         <FormContainer ref={formRef}>
           {Object.keys(form).map((key) => {
             if (form[key] === "text-area") {
@@ -114,12 +121,13 @@ const FormContainer = styled.form`
   }
 `;
 
-function BackHeader({ onClick }: any) {
+function BackHeader({ onClick, title }: any) {
   return (
     <StyledBackHeader>
       <button onClick={onClick}>
         <IconChevron />
       </button>
+      <span>{title}</span>
     </StyledBackHeader>
   );
 }
@@ -129,6 +137,30 @@ const StyledBackHeader = styled.div`
   display: flex;
   border-bottom: 1px solid var(--gray6);
   padding-left: 8px;
+  align-items: center;
+  gap: 4px;
+  button {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+      background: var(--gray2);
+      color: black;
+      border-radius: 8px;
+    }
+    svg {
+      display: block;
+    }
+  }
+  span {
+    color: var(--gray11);
+    margin-bottom: 1px;
+    &::first-letter {
+      text-transform: uppercase;
+    }
+  }
 `;
 
 function IconChevron() {
@@ -149,13 +181,15 @@ function IconChevron() {
   );
 }
 
-export function Noclip({ content, onUnmount }: ModalProps) {
+export function Noclip({ content }: ModalProps) {
   const firstValue = formatValue(Object.keys(content)[0]);
   const [value, setValue] = React.useState(firstValue);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const listRef = React.useRef(null);
   const [pages, setPages] = React.useState<string[]>([]);
   const isHome = pages.length === 0;
+
+  const [title, setTitle] = React.useState<string>();
 
   React.useEffect(() => {
     inputRef?.current?.focus();
@@ -173,7 +207,14 @@ export function Noclip({ content, onUnmount }: ModalProps) {
           ? (content[key] as Function)
           : () => setPages([...pages, key]);
       return (
-        <Item key={key} value={value} onSelect={() => action()}>
+        <Item
+          key={key}
+          value={value}
+          onSelect={() => {
+            setTitle(value);
+            action();
+          }}
+        >
           <span>{value}</span>
           <span className="accessory">
             {typeof content[key] === "function" ? "action" : "form"}
@@ -187,7 +228,12 @@ export function Noclip({ content, onUnmount }: ModalProps) {
       {isHome && (
         <Input ref={inputRef} autoFocus placeholder="Type a command..." />
       )}
-      {!isHome && <BackHeader />}
+      {!isHome && (
+        <BackHeader
+          onClick={() => setPages(pages.slice(0, -1))}
+          title={title}
+        />
+      )}
       <List ref={listRef}>
         {isHome && (
           <>
@@ -207,8 +253,15 @@ export function Noclip({ content, onUnmount }: ModalProps) {
 
       <Footer>
         <button>
-          Run action
-          <kbd>↵</kbd>
+          {pages.length === 0 ? "Run action" : "Submit form"}
+          {pages.length === 0 ? (
+            <kbd>↵</kbd>
+          ) : (
+            <>
+              <kbd>⌘</kbd>
+              <kbd>↵</kbd>
+            </>
+          )}
         </button>
         <SubCommand
           listRef={listRef}
