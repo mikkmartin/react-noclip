@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
 import { Root, Content, DialogProps } from "@radix-ui/react-dialog";
-import FocusTrap from "focus-trap-react";
 
 export const Dialog: FC<DialogProps & { onUnmount: Function }> = ({
   children,
@@ -10,20 +9,13 @@ export const Dialog: FC<DialogProps & { onUnmount: Function }> = ({
 }) => {
   return (
     <Root open={open}>
-      <FocusTrap
-        active={open}
-        focusTrapOptions={{
-          escapeDeactivates: false,
-        }}
+      <Container
+        onEscapeKeyDown={() => onUnmount()}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={() => onUnmount()}
       >
-        <Container
-          onEscapeKeyDown={() => onUnmount()}
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          onPointerDownOutside={() => onUnmount()}
-        >
-          {children}
-        </Container>
-      </FocusTrap>
+        {children}
+      </Container>
     </Root>
   );
 };
