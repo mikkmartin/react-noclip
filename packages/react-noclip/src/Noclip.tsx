@@ -49,7 +49,6 @@ function FormView({ form, onBack }: { form: Form; onBack?: Function }) {
 
   return (
     <>
-      <BackHeader onClick={() => onBack && onBack()} />
       <FormContainer ref={formRef}>
         {Object.keys(form).map((key) => {
           if (form[key] === "text-area") {
@@ -84,7 +83,7 @@ const FormContainer = styled.form`
   column-gap: 1rem;
   grid-template-columns: 1fr 2fr 1fr;
   place-content: center;
-  height: min(330px, calc(var(--cmdk-list-height) + 16px));
+  //height: min(330px, calc(var(--cmdk-list-height) + 16px));
   label {
     margin-left: auto;
     font-size: 12px;
@@ -138,9 +137,6 @@ function IconChevron({ direction }: { direction?: "left" | "right" }) {
       strokeLinejoin="round"
       strokeWidth="2"
       viewBox="0 0 24 24"
-      style={{
-        transform: direction === "left" ? "rotate(180deg)" : undefined,
-      }}
     >
       <path d="M15 18L9 12 15 6"></path>
     </svg>
@@ -181,50 +177,42 @@ export function Noclip({ content, onUnmount }: ModalProps) {
     });
 
   return (
-    <Dialog open={true} onOpenChange={(state) => !state && onUnmount()}>
-      <Command value={value} onValueChange={setValue}>
+    <Command value={value} onValueChange={setValue}>
+      {isHome && (
+        <Input ref={inputRef} autoFocus placeholder="Type a command..." />
+      )}
+      {!isHome && <BackHeader />}
+      <List ref={listRef}>
         {isHome && (
-          <Input ref={inputRef} autoFocus placeholder="Type a command..." />
-        )}
-        {isHome && (
-          <List ref={listRef}>
+          <>
             <Empty>No results found.</Empty>
             {renderContent()}
-          </List>
+          </>
         )}
         {!isHome && (
-          <FormView
-            form={content[pages[0]] as Form}
-            onBack={() => setPages(pages.slice(0, -1))}
-          />
+          <>
+            <FormView
+              form={content[pages[0]] as Form}
+              onBack={() => setPages(pages.slice(0, -1))}
+            />
+          </>
         )}
+      </List>
 
-        <Footer>
-          <button>
-            Run action
-            <kbd>↵</kbd>
-          </button>
-          <SubCommand
-            listRef={listRef}
-            selectedValue={value}
-            inputRef={inputRef}
-          />
-        </Footer>
-      </Command>
-    </Dialog>
+      <Footer>
+        <button>
+          Run action
+          <kbd>↵</kbd>
+        </button>
+        <SubCommand
+          listRef={listRef}
+          selectedValue={value}
+          inputRef={inputRef}
+        />
+      </Footer>
+    </Command>
   );
 }
-
-const Dialog = styled(CommandBase.Dialog)`
-  all: revert;
-  * {
-    all: revert;
-  }
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-`;
 
 const Command = styled(CommandBase)`
   ${styleVars};
@@ -402,9 +390,6 @@ function SubCommand({
       if (e.key === "k" && e.metaKey) {
         e.preventDefault();
         setOpen((o) => !o);
-      } else if (e.key === "Escape") {
-        e.stopPropagation();
-        setOpen(false);
       }
     }
 

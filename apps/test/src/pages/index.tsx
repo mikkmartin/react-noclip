@@ -25,6 +25,8 @@ export default function Docs() {
     <div>
       <h1>react-noclip Documentation</h1>
       <pre>{JSON.stringify(Object.keys(buttons), null, 2)}</pre>
+      <input type="text" />
+      <button>does nothing</button>
     </div>
   );
 }
