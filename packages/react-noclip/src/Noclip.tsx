@@ -3,6 +3,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { Command as CommandBase } from "cmdk";
 import * as React from "react";
 import { styleVars } from "./styles";
+import * as Dialog from "@radix-ui/react-dialog";
 
 type OnSubmit = (value: Object) => void;
 
@@ -20,7 +21,7 @@ type ModalProps = {
   [key: string]: any;
 };
 
-function FormView({ form, onBack }: { form: Form; onBack?: Function }) {
+function FormView({ form, onBack }: { form: Form; onBack: Function }) {
   const formRef = React.useRef<HTMLFormElement>(null);
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -32,7 +33,10 @@ function FormView({ form, onBack }: { form: Form; onBack?: Function }) {
         if (typeof form[key] === "function") return acc;
         return { ...acc, [key]: formData.get(key) };
       }, {});
-      if (form.onSubmit) form.onSubmit(values);
+      if (form.onSubmit) {
+        form.onSubmit(values);
+        onBack();
+      }
     }
   };
 
@@ -48,31 +52,33 @@ function FormView({ form, onBack }: { form: Form; onBack?: Function }) {
   }, []);
 
   return (
-    <>
-      <FormContainer ref={formRef}>
-        {Object.keys(form).map((key) => {
-          if (form[key] === "text-area") {
-            return (
-              <React.Fragment key={key}>
-                <label>{key}</label>
-                <textarea name={key} />
-                <div />
-              </React.Fragment>
-            );
-          }
-          if (form[key] === "text-input") {
-            return (
-              <React.Fragment key={key}>
-                <label>{key}</label>
-                <input name={key} />
-                <div />
-              </React.Fragment>
-            );
-          }
-          return null;
-        })}
-      </FormContainer>
-    </>
+    <Dialog.Root defaultOpen onOpenChange={(state) => !state && onBack()}>
+      <Dialog.Content asChild onOpenAutoFocus={(e) => e.preventDefault()}>
+        <FormContainer ref={formRef}>
+          {Object.keys(form).map((key) => {
+            if (form[key] === "text-area") {
+              return (
+                <React.Fragment key={key}>
+                  <label>{key}</label>
+                  <textarea name={key} />
+                  <div />
+                </React.Fragment>
+              );
+            }
+            if (form[key] === "text-input") {
+              return (
+                <React.Fragment key={key}>
+                  <label>{key}</label>
+                  <input name={key} />
+                  <div />
+                </React.Fragment>
+              );
+            }
+            return null;
+          })}
+        </FormContainer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 }
 
@@ -125,7 +131,7 @@ const StyledBackHeader = styled.div`
   padding-left: 8px;
 `;
 
-function IconChevron({ direction }: { direction?: "left" | "right" }) {
+function IconChevron() {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
