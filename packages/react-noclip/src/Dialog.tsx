@@ -1,16 +1,13 @@
 import styled from "@emotion/styled";
 import { FC } from "react";
-import {
-  Root,
-  Content,
-  DialogProps,
-  PortalProps,
-} from "@radix-ui/react-dialog";
+import { Root, Content, DialogProps } from "@radix-ui/react-dialog";
 import FocusTrap from "focus-trap-react";
 
-export const Dialog: FC<
-  DialogProps & PortalProps & { onUnmount: Function }
-> = ({ children, open, onUnmount }) => {
+export const Dialog: FC<DialogProps & { onUnmount: Function }> = ({
+  children,
+  open,
+  onUnmount,
+}) => {
   return (
     <Root open={open}>
       <FocusTrap

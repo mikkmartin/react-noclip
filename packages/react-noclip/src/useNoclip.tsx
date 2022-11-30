@@ -32,11 +32,7 @@ export function useNoclip(content: Content) {
     if (!mountPointRef.current) return;
     rootNodeRef.current.render(
       <CacheProvider value={cacheRef.current!}>
-        <Dialog
-          open={mountedRef.current}
-          container={mountPointRef.current as unknown as HTMLDivElement}
-          onUnmount={unmount}
-        >
+        <Dialog open={mountedRef.current} onUnmount={unmount}>
           <Noclip content={content} />
         </Dialog>
       </CacheProvider>
