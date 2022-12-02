@@ -463,21 +463,13 @@ function SubCommand({
     const el = listRef.current;
 
     if (!el) return;
-
-    if (open) {
-      el.style.overflow = "hidden";
-    } else {
-      el.style.overflow = "";
-    }
+    if (open) el.style.overflow = "hidden";
+    else el.style.overflow = "";
   }, [open, listRef]);
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen} modal>
-      <Popover.Trigger
-        cmdk-raycast-subcommand-trigger=""
-        onClick={() => setOpen(true)}
-        aria-expanded={open}
-      >
+      <Popover.Trigger onClick={() => setOpen(true)} aria-expanded={open}>
         Actions
         <kbd>⌘</kbd>
         <kbd>K</kbd>
@@ -487,6 +479,7 @@ function SubCommand({
         align="end"
         sideOffset={14}
         alignOffset={0}
+        onOpenAutoFocus={(e) => e.preventDefault()}
         onCloseAutoFocus={(e) => {
           e.preventDefault();
           inputRef?.current?.focus();
@@ -499,7 +492,7 @@ function SubCommand({
               <SubItem>Assign shortcut</SubItem>
             </Group>
           </List>
-          <SubInput placeholder="Search for actions..." />
+          <SubInput autoFocus placeholder="Search for actions..." />
         </SubCommandContainer>
       </Popover.Content>
     </Popover.Root>
