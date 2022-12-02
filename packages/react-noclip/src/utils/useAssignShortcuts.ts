@@ -28,8 +28,6 @@ export const useAssignShortcuts = (content: Content) => {
           .replace("⌃", "")
           .replace("⇧", "")
           .toLowerCase();
-
-        console.log(letterKey);
         if (
           e.key.toLocaleLowerCase() === letterKey &&
           keys.includes("Meta") === e.metaKey &&
