@@ -4,6 +4,7 @@ import { Command as CommandBase } from "cmdk";
 import * as React from "react";
 import { styleVars } from "./styles";
 import * as Dialog from "@radix-ui/react-dialog";
+import { useAttributeChange } from "./utils/useAttributeChange";
 
 type OnSubmit = (value: { [key: string]: string }) => void;
 
@@ -181,6 +182,29 @@ function IconChevron() {
   );
 }
 
+type SubCommands = {
+  title: string;
+  actions: {
+    [key: string]: () => void;
+  };
+};
+
+function formatValue(value: string) {
+  return value.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
+}
+
+const Item = React.forwardRef<
+  HTMLDivElement | undefined,
+  { onActive?: (state: string | null) => void } & React.ComponentProps<
+    typeof ItemBase
+  >
+>(({ onActive, ...props }, ref) => {
+  const _ref = React.useRef<HTMLDivElement>(null);
+  if (ref) ref = _ref;
+  useAttributeChange({ ref: _ref, attribute: "aria-selected" }, onActive);
+  return <ItemBase {...props} ref={_ref} />;
+});
+
 export function Noclip({ content }: ModalProps) {
   const firstValue = formatValue(Object.keys(content)[0]);
   const [value, setValue] = React.useState(firstValue);
@@ -190,14 +214,11 @@ export function Noclip({ content }: ModalProps) {
   const isHome = pages.length === 0;
 
   const [title, setTitle] = React.useState<string>();
+  const [subCommands, setSubCommands] = React.useState<SubCommands>();
 
   React.useEffect(() => {
     inputRef?.current?.focus();
   }, []);
-
-  function formatValue(value: string) {
-    return value.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
-  }
 
   const renderContent = () =>
     Object.keys(content).map((key) => {
@@ -206,10 +227,20 @@ export function Noclip({ content }: ModalProps) {
         typeof content[key] === "function"
           ? (content[key] as Function)
           : () => setPages([...pages, key]);
+
       return (
         <Item
           key={key}
           value={value}
+          onActive={(active) => {
+            if (active !== "true") return;
+            setSubCommands({
+              title: value,
+              actions: {
+                runAction: () => action(),
+              },
+            });
+          }}
           onSelect={() => {
             setTitle(value);
             action();
@@ -263,11 +294,13 @@ export function Noclip({ content }: ModalProps) {
             </>
           )}
         </button>
-        <SubCommand
-          listRef={listRef}
-          selectedValue={value}
-          inputRef={inputRef}
-        />
+        {subCommands && (
+          <SubCommand
+            listRef={listRef}
+            inputRef={inputRef}
+            commands={subCommands}
+          />
+        )}
       </Footer>
     </Command>
   );
@@ -390,7 +423,7 @@ const List = styled(CommandBase.List)`
   transition-property: height;
 `;
 
-const Item = styled(CommandBase.Item)`
+const ItemBase = styled(CommandBase.Item)`
   content-visibility: auto;
   display: flex;
   justify-content: space-between;
@@ -413,7 +446,7 @@ const Item = styled(CommandBase.Item)`
     text-transform: uppercase;
   }
 
-  span:last-of-type {
+  span:nth-child(2) {
     color: var(--gray9);
   }
 
@@ -436,11 +469,11 @@ const Item = styled(CommandBase.Item)`
 function SubCommand({
   inputRef,
   listRef,
-  selectedValue,
+  commands,
 }: {
   inputRef: React.RefObject<HTMLInputElement>;
   listRef: React.RefObject<HTMLElement>;
-  selectedValue: string;
+  commands: SubCommands;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -451,9 +484,7 @@ function SubCommand({
         setOpen((o) => !o);
       }
     }
-
     document.addEventListener("keydown", listener);
-
     return () => {
       document.removeEventListener("keydown", listener);
     };
@@ -487,9 +518,18 @@ function SubCommand({
       >
         <SubCommandContainer>
           <List>
-            <Group heading={selectedValue}>
-              <SubItem>Run action</SubItem>
-              <SubItem>Assign shortcut</SubItem>
+            <Group heading={commands?.title || ""}>
+              {Object.keys(commands.actions).map((key) => (
+                <SubItem
+                  key={key}
+                  onSelect={() => {
+                    commands.actions[key]();
+                    setOpen(false);
+                  }}
+                >
+                  <span>{formatValue(key)}</span>
+                </SubItem>
+              ))}
             </Group>
           </List>
           <SubInput autoFocus placeholder="Search for actions..." />
