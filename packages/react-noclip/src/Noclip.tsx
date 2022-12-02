@@ -5,7 +5,7 @@ import * as React from "react";
 import { styleVars } from "./styles";
 import * as Dialog from "@radix-ui/react-dialog";
 
-type OnSubmit = (value: Object) => void;
+type OnSubmit = (value: { [key: string]: string }) => void;
 
 type Form = {
   [key: string]: "text-area" | "text-input" | OnSubmit | undefined;
