@@ -5,6 +5,9 @@ import * as React from "react";
 import { styleVars } from "./styles";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useAttributeChange } from "./utils/useAttributeChange";
+import { css } from "@emotion/react";
+import useLocalStorage from "./utils/useLocalStorage";
+import { LOCALSTORAGE_SHORTCUTS } from "./utils/constants";
 
 type OnSubmit = (value: { [key: string]: string }) => void;
 
@@ -220,6 +223,10 @@ export function Noclip({ content }: ModalProps) {
     inputRef?.current?.focus();
   }, []);
 
+  const [shortcuts] = useLocalStorage<{
+    [key: string]: string;
+  }>(LOCALSTORAGE_SHORTCUTS);
+
   const renderContent = () =>
     Object.keys(content).map((key) => {
       const value = formatValue(key);
@@ -235,9 +242,10 @@ export function Noclip({ content }: ModalProps) {
           onActive={(active) => {
             if (active !== "true") return;
             setSubCommands({
-              title: value,
+              title: key,
               actions: {
                 runAction: () => action(),
+                assignShortcut: () => console.log("not implemented"),
               },
             });
           }}
@@ -247,9 +255,14 @@ export function Noclip({ content }: ModalProps) {
           }}
         >
           <span>{value}</span>
-          <span className="accessory">
-            {typeof content[key] === "function" ? "action" : "form"}
-          </span>
+          {shortcuts && shortcuts[key] && (
+            <KeyGroup>
+              {shortcuts[key].split("").map((key) => (
+                <kbd>{key}</kbd>
+              ))}
+            </KeyGroup>
+          )}
+          <span>{typeof content[key] === "function" ? "action" : "form"}</span>
         </Item>
       );
     });
@@ -337,6 +350,7 @@ const Command = styled(CommandBase)`
     display: flex;
     align-items: center;
     justify-content: center;
+    text-transform: uppercase;
 
     &:first-of-type {
       margin-left: 4px;
@@ -450,6 +464,10 @@ const ItemBase = styled(CommandBase.Item)`
     color: var(--gray9);
   }
 
+  span:last-child {
+    margin-left: auto;
+  }
+
   &[aria-selected="true"] {
     background: var(--grayA3);
     color: var(--gray12);
@@ -476,6 +494,11 @@ function SubCommand({
   commands: SubCommands;
 }) {
   const [open, setOpen] = React.useState(false);
+  const [assigningShortucts, setAssigningShortuts] = React.useState(false);
+  const [shortcutKeys, setShortcutKeys] = React.useState("");
+  const [_, setShortcuts] = useLocalStorage<{
+    [key: string]: string;
+  }>(LOCALSTORAGE_SHORTCUTS);
 
   React.useEffect(() => {
     function listener(e: KeyboardEvent) {
@@ -498,8 +521,79 @@ function SubCommand({
     else el.style.overflow = "";
   }, [open, listRef]);
 
+  React.useEffect(() => {
+    if (!assigningShortucts) return;
+
+    function hasModifierKey() {
+      switch (true) {
+        case shortcutKeys.includes("⌘"):
+        case shortcutKeys.includes("⌥"):
+        case shortcutKeys.includes("⇧"):
+        case shortcutKeys.includes("⌃"):
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    function listener(e: KeyboardEvent) {
+      switch (e.key) {
+        case "Escape":
+          setShortcutKeys("");
+          setAssigningShortuts(false);
+          break;
+        case "Meta":
+          setShortcutKeys((s) => s + "⌘");
+          break;
+        case "Alt":
+          setShortcutKeys((s) => s + "⌥");
+          break;
+        case "Shift":
+          setShortcutKeys((s) => s + "⇧");
+          break;
+        case "Control":
+          setShortcutKeys((s) => s + "⌃");
+          break;
+      }
+      if (hasModifierKey() && e.key.length === 1) {
+        setShortcutKeys((s) => {
+          const shortcut = s + e.key;
+          setShortcuts((s) => ({
+            ...s,
+            [commands.title]: shortcut,
+          }));
+          return shortcut;
+        });
+        setAssigningShortuts(false);
+      }
+    }
+
+    function upListener(e: KeyboardEvent) {
+      if (e.key === "Meta") setShortcutKeys((s) => s.replace("⌘", ""));
+      if (e.key === "Alt") setShortcutKeys((s) => s.replace("⌥", ""));
+      if (e.key === "Shift") setShortcutKeys((s) => s.replace("⇧", ""));
+      if (e.key === "Control") setShortcutKeys((s) => s.replace("⌃", ""));
+    }
+
+    document.addEventListener("keydown", listener);
+    document.addEventListener("keyup", upListener);
+    return () => {
+      document.removeEventListener("keydown", listener);
+      document.removeEventListener("keyup", upListener);
+    };
+  }, [assigningShortucts, shortcutKeys]);
+
+  function removeShortcut() {
+    setShortcuts((s) => {
+      const newShortcuts = { ...s };
+      delete newShortcuts[commands.title];
+      return newShortcuts;
+    });
+    setShortcutKeys("");
+  }
+
   return (
-    <Popover.Root open={open} onOpenChange={setOpen} modal>
+    <Popover.Root open={open} modal>
       <Popover.Trigger onClick={() => setOpen(true)} aria-expanded={open}>
         Actions
         <kbd>⌘</kbd>
@@ -515,29 +609,96 @@ function SubCommand({
           e.preventDefault();
           inputRef?.current?.focus();
         }}
+        onEscapeKeyDown={() => {
+          if (assigningShortucts) return;
+          setOpen(false);
+        }}
       >
         <SubCommandContainer>
           <List>
             <Group heading={commands?.title || ""}>
-              {Object.keys(commands.actions).map((key) => (
-                <SubItem
-                  key={key}
-                  onSelect={() => {
-                    commands.actions[key]();
-                    setOpen(false);
-                  }}
-                >
-                  <span>{formatValue(key)}</span>
-                </SubItem>
-              ))}
+              {Object.keys(commands.actions).map((key) => {
+                if (key === "assignShortcut") {
+                  return (
+                    <SubItem
+                      key={key}
+                      value={key}
+                      onSelect={() => {
+                        if (!shortcutKeys) setAssigningShortuts(true);
+                        else removeShortcut();
+                      }}
+                    >
+                      {assigningShortucts ? (
+                        <>
+                          <span>Recoding keys...</span>
+                          {shortcutKeys.length ? (
+                            <KeyGroup>
+                              {shortcutKeys.split("").map((key) => (
+                                <kbd key={key}>{key}</kbd>
+                              ))}
+                            </KeyGroup>
+                          ) : (
+                            <KeyGroup dimmed>
+                              eg. <kbd>⌘</kbd>
+                              <kbd>⇧</kbd>
+                              <kbd>E</kbd>
+                            </KeyGroup>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <span>
+                            {shortcutKeys
+                              ? "Remove shortcut"
+                              : formatValue(key)}
+                          </span>
+                          {shortcutKeys && (
+                            <KeyGroup>
+                              {shortcutKeys.split("").map((key) => (
+                                <kbd key={key}>{key}</kbd>
+                              ))}
+                            </KeyGroup>
+                          )}
+                        </>
+                      )}
+                    </SubItem>
+                  );
+                }
+                return (
+                  <SubItem
+                    key={key}
+                    onSelect={() => {
+                      commands.actions[key]();
+                      setOpen(false);
+                    }}
+                  >
+                    <span>{formatValue(key)}</span>
+                  </SubItem>
+                );
+              })}
             </Group>
           </List>
-          <SubInput autoFocus placeholder="Search for actions..." />
+          <SubInput
+            autoFocus
+            placeholder="Search for actions..."
+            onValueChange={console.log}
+          />
         </SubCommandContainer>
       </Popover.Content>
     </Popover.Root>
   );
 }
+
+const KeyGroup = styled.div<{ dimmed?: boolean }>`
+  ${(p) =>
+    p.dimmed &&
+    css`
+      color: var(--gray9);
+      opacity: 0.5;
+    `}
+  display: flex;
+  gap: 4px;
+`;
 
 const SubCommandContainer = styled(Command)`
   width: 320px;

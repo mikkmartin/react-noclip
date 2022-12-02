@@ -4,6 +4,7 @@ import { Content, Noclip } from "./Noclip";
 import createCache, { EmotionCache } from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { Dialog } from "./Dialog";
+import { useAssignShortcuts } from "./utils/useAssignShortcuts";
 
 export function useNoclip(content: Content) {
   const mountedRef = useRef<boolean>(false);
@@ -11,6 +12,8 @@ export function useNoclip(content: Content) {
   const cacheRef = useRef<EmotionCache>();
   const domNodeRef = useRef<HTMLDivElement>();
   const mountPointRef = useRef<ShadowRoot>();
+
+  useAssignShortcuts(content);
 
   function mount() {
     mountedRef.current = true;
@@ -30,8 +33,9 @@ export function useNoclip(content: Content) {
   function render() {
     if (!rootNodeRef.current) return;
     if (!mountPointRef.current) return;
+    if (!cacheRef.current) return;
     rootNodeRef.current.render(
-      <CacheProvider value={cacheRef.current!}>
+      <CacheProvider value={cacheRef.current}>
         <Dialog open={mountedRef.current} onUnmount={unmount}>
           <Noclip content={content} />
         </Dialog>
@@ -52,8 +56,8 @@ export function useNoclip(content: Content) {
   };
 
   useEffect(() => {
-    document.addEventListener("keydown", onKeyDown);
     if (mountedRef.current) render();
+    document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [content]);
 }

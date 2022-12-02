@@ -16,10 +16,6 @@ export const GlobalStyles = () => (
         font-family: ${fontStack};
         font-size: 16px;
       }
-      * {
-        border: 1px solid red;
-        background: rgba(255, 0, 0, 0.05);
-      }
     `}
   />
 );
