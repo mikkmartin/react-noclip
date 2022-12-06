@@ -22,6 +22,11 @@ export type Content = {
 
 type ModalProps = {
   content: Content;
+  shortcuts: [
+    { [key: string]: string } | undefined,
+    React.Dispatch<React.SetStateAction<{ [key: string]: string } | undefined>>,
+    () => void
+  ];
 };
 
 function FormView({ form, onBack }: { form: Form; onBack: Function }) {
@@ -188,7 +193,8 @@ function IconChevron() {
 type SubCommands = {
   title: string;
   actions: {
-    [key: string]: () => void;
+    runAction: () => void;
+    assignShortcut: (keyCombination: string | null) => any;
   };
 };
 
@@ -208,7 +214,7 @@ const Item = React.forwardRef<
   return <ItemBase {...props} ref={_ref} />;
 });
 
-export function Noclip({ content }: ModalProps) {
+export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
   const firstValue = formatValue(Object.keys(content)[0]);
   const [value, setValue] = React.useState(firstValue);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -223,9 +229,7 @@ export function Noclip({ content }: ModalProps) {
     inputRef?.current?.focus();
   }, []);
 
-  const [shortcuts] = useLocalStorage<{
-    [key: string]: string;
-  }>(LOCALSTORAGE_SHORTCUTS);
+  const [shortcuts, setShortcuts] = _shortcuts;
 
   const renderContent = () =>
     Object.keys(content).map((key) => {
@@ -245,7 +249,17 @@ export function Noclip({ content }: ModalProps) {
               title: key,
               actions: {
                 runAction: () => action(),
-                assignShortcut: () => console.log("not implemented"),
+                assignShortcut: (shortcut: string | null) => {
+                  if (!shortcut) {
+                    setShortcuts((s) => {
+                      const shortcuts = { ...s };
+                      if (shortcuts && shortcuts[key]) delete shortcuts[key];
+                      return shortcuts;
+                    });
+                  } else {
+                    setShortcuts((s) => ({ ...s, [key]: shortcut }));
+                  }
+                },
               },
             });
           }}
@@ -309,6 +323,7 @@ export function Noclip({ content }: ModalProps) {
         </button>
         {subCommands && (
           <SubCommand
+            shortcut={shortcuts && shortcuts[subCommands.title]}
             listRef={listRef}
             inputRef={inputRef}
             commands={subCommands}
@@ -464,7 +479,7 @@ const ItemBase = styled(CommandBase.Item)`
     color: var(--gray9);
   }
 
-  span:last-child {
+  span ~ *:last-child {
     margin-left: auto;
   }
 
@@ -488,7 +503,9 @@ function SubCommand({
   inputRef,
   listRef,
   commands,
+  shortcut,
 }: {
+  shortcut?: string;
   inputRef: React.RefObject<HTMLInputElement>;
   listRef: React.RefObject<HTMLElement>;
   commands: SubCommands;
@@ -496,9 +513,10 @@ function SubCommand({
   const [open, setOpen] = React.useState(false);
   const [assigningShortucts, setAssigningShortuts] = React.useState(false);
   const [shortcutKeys, setShortcutKeys] = React.useState("");
-  const [_, setShortcuts] = useLocalStorage<{
-    [key: string]: string;
-  }>(LOCALSTORAGE_SHORTCUTS);
+
+  React.useEffect(() => {
+    setShortcutKeys(shortcut || "");
+  }, [shortcut]);
 
   React.useEffect(() => {
     function listener(e: KeyboardEvent) {
@@ -558,10 +576,7 @@ function SubCommand({
       if (hasModifierKey() && e.key.length === 1) {
         setShortcutKeys((s) => {
           const shortcut = s + e.key;
-          setShortcuts((s) => ({
-            ...s,
-            [commands.title]: shortcut,
-          }));
+          commands.actions.assignShortcut(shortcut);
           return shortcut;
         });
         setAssigningShortuts(false);
@@ -584,12 +599,12 @@ function SubCommand({
   }, [assigningShortucts, shortcutKeys]);
 
   function removeShortcut() {
-    setShortcuts((s) => {
-      const newShortcuts = { ...s };
-      delete newShortcuts[commands.title];
-      return newShortcuts;
-    });
+    commands.actions.assignShortcut(null);
     setShortcutKeys("");
+  }
+
+  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (assigningShortucts) e.preventDefault();
   }
 
   return (
@@ -668,6 +683,7 @@ function SubCommand({
                   <SubItem
                     key={key}
                     onSelect={() => {
+                      //@ts-ignore
                       commands.actions[key]();
                       setOpen(false);
                     }}
@@ -680,8 +696,8 @@ function SubCommand({
           </List>
           <SubInput
             autoFocus
+            onKeyDown={handleInputKeyDown}
             placeholder="Search for actions..."
-            onValueChange={console.log}
           />
         </SubCommandContainer>
       </Popover.Content>

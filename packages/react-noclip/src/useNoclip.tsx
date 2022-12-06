@@ -13,7 +13,7 @@ export function useNoclip(content: Content) {
   const domNodeRef = useRef<HTMLDivElement>();
   const mountPointRef = useRef<ShadowRoot>();
 
-  useAssignShortcuts(content);
+  const stortcutState = useAssignShortcuts(content);
 
   function mount() {
     mountedRef.current = true;
@@ -37,7 +37,7 @@ export function useNoclip(content: Content) {
     rootNodeRef.current.render(
       <CacheProvider value={cacheRef.current}>
         <Dialog open={mountedRef.current} onUnmount={unmount}>
-          <Noclip content={content} />
+          <Noclip content={content} shortcuts={stortcutState} />
         </Dialog>
       </CacheProvider>
     );

@@ -19,6 +19,7 @@ importers:
   apps/test:
     specifiers:
       '@emotion/react': ^11.10.5
+      '@emotion/styled': ^11.10.5
       '@noclip/tsconfig': workspace:*
       '@types/node': ^17.0.12
       '@types/react': ^18.0.22
@@ -32,6 +33,7 @@ importers:
       typescript: ^4.5.4
     dependencies:
       '@emotion/react': 11.10.5_cuziicjcvwawlf5iuhzacuhqcy
+      '@emotion/styled': 11.10.5_hmjty4frusbltjhl3xd7udcm2y
       framer-motion: 7.6.18_biqbaboplfbrettd7655fr4n2y
       next: 13.0.6_mqvh5p7ejg4taogoj6tpk3gd5a
       react: 18.2.0
@@ -294,7 +296,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.13.11
-    dev: true
 
   /@babel/template/7.18.10:
     resolution: {integrity: sha512-TI+rCtooWHr3QJ27kJxfjutghu44DLnasDMwpDqCXVTal9RLp3RSYNh4NdBrRP2cQAoG9A8juOQl6P6oZG4JxA==}
@@ -523,7 +524,7 @@ packages:
       '@babel/core': 7.20.2
       '@babel/helper-module-imports': 7.18.6
       '@babel/plugin-syntax-jsx': 7.18.6_@babel+core@7.20.2
-      '@babel/runtime': 7.20.1
+      '@babel/runtime': 7.20.6
       '@emotion/hash': 0.9.0
       '@emotion/memoize': 0.8.0
       '@emotion/serialize': 1.1.1
@@ -625,7 +626,7 @@ packages:
         optional: true
     dependencies:
       '@babel/core': 7.20.2
-      '@babel/runtime': 7.20.1
+      '@babel/runtime': 7.20.6
       '@emotion/babel-plugin': 11.10.5_@babel+core@7.20.2
       '@emotion/is-prop-valid': 1.2.0
       '@emotion/react': 11.10.5_cuziicjcvwawlf5iuhzacuhqcy
@@ -1631,7 +1632,7 @@ packages:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
     engines: {node: '>=10', npm: '>=6'}
     dependencies:
-      '@babel/runtime': 7.20.1
+      '@babel/runtime': 7.20.6
       cosmiconfig: 7.1.0
       resolve: 1.22.1
     dev: false

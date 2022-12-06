@@ -4,9 +4,11 @@ import { LOCALSTORAGE_SHORTCUTS } from "./constants";
 import useLocalStorage from "./useLocalStorage";
 
 export const useAssignShortcuts = (content: Content) => {
-  const [shortcutObject] = useLocalStorage<{
+  const stortcuts = useLocalStorage<{
     [key: string]: string;
   }>(LOCALSTORAGE_SHORTCUTS);
+
+  const [shortcutObject] = stortcuts;
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -43,4 +45,6 @@ export const useAssignShortcuts = (content: Content) => {
     window.addEventListener("keydown", listener);
     return () => window.removeEventListener("keydown", listener);
   }, [content, shortcutObject]);
+
+  return stortcuts;
 };
