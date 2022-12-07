@@ -16,16 +16,11 @@ export default function Docs() {
 
   return (
     <Container>
-      <AnimatePresence>
         {showHeader && (
           <motion.div
-            key={key}
             animate={open ? "open" : "closed"}
-            variants={{
-              initial: { scale: 0 },
-              open: { scale: 1 },
-            }}
             className="animation-container"
+            key={key}
           >
             <motion.div
               variants={{ closed: { x: "100%" }, open: { x: "40%" } }}
@@ -36,7 +31,6 @@ export default function Docs() {
             />
           </motion.div>
         )}
-      </AnimatePresence>
       <input type="text" />
       <button>does nothing</button>
     </Container>

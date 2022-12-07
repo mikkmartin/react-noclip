@@ -8,6 +8,7 @@ import { useAttributeChange } from "./utils/useAttributeChange";
 import { css } from "@emotion/react";
 import useLocalStorage from "./utils/useLocalStorage";
 import { LOCALSTORAGE_SHORTCUTS } from "./utils/constants";
+import usePrevious from "./utils/usePrevious";
 
 type OnSubmit = (value: { [key: string]: string }) => void;
 
@@ -513,6 +514,11 @@ function SubCommand({
   const [open, setOpen] = React.useState(false);
   const [assigningShortucts, setAssigningShortuts] = React.useState(false);
   const [shortcutKeys, setShortcutKeys] = React.useState("");
+  const assignedShortcuts = usePrevious(assigningShortucts);
+  const blink = React.useMemo(
+    () => assignedShortcuts && !assigningShortucts,
+    [assigningShortucts]
+  );
 
   React.useEffect(() => {
     setShortcutKeys(shortcut || "");
@@ -668,7 +674,7 @@ function SubCommand({
                               : formatValue(key)}
                           </span>
                           {shortcutKeys && (
-                            <KeyGroup>
+                            <KeyGroup blink={blink}>
                               {shortcutKeys.split("").map((key) => (
                                 <kbd key={key}>{key}</kbd>
                               ))}
@@ -705,15 +711,37 @@ function SubCommand({
   );
 }
 
-const KeyGroup = styled.div<{ dimmed?: boolean }>`
-  ${(p) =>
-    p.dimmed &&
+const KeyGroup = styled.div<{ dimmed?: boolean; blink?: boolean }>`
+  ${({ dimmed }) =>
+    dimmed &&
     css`
       color: var(--gray9);
       opacity: 0.5;
     `}
+  ${({ blink }) =>
+    blink &&
+    css`
+      kbd {
+        animation: blink 1s linear;
+      }
+    `}
   display: flex;
   gap: 4px;
+  @keyframes blink {
+    0% {
+      background: black;
+      color: white;
+    }
+    3% {
+      background: rgba(0, 0, 0, 0.065);
+    }
+    10% {
+      color: white;
+    }
+    100% {
+      color: var(--gray11);
+    }
+  }
 `;
 
 const SubCommandContainer = styled(Command)`
