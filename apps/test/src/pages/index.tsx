@@ -2,35 +2,38 @@ import { useState } from "react";
 import { useNoclip } from "react-noclip";
 import { AnimatePresence, motion } from "framer-motion";
 import styled from "@emotion/styled";
+import { useTheme } from "next-themes";
 
 export default function Docs() {
   const [showHeader, setShowHeader] = useState(true);
   const [key, setKey] = useState(0);
   const [open, setOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useNoclip({
     toggleAnimation: () => setShowHeader(!showHeader),
     restartAnimation: () => setKey(key + 1),
     toggleOpen: () => setOpen(!open),
+    toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
   });
 
   return (
     <Container>
-        {showHeader && (
+      {showHeader && (
+        <motion.div
+          animate={open ? "open" : "closed"}
+          className="animation-container"
+          key={key}
+        >
           <motion.div
-            animate={open ? "open" : "closed"}
-            className="animation-container"
-            key={key}
-          >
-            <motion.div
-              variants={{ closed: { x: "100%" }, open: { x: "40%" } }}
-            />
-            <motion.div />
-            <motion.div
-              variants={{ closed: { x: "-100%" }, open: { x: "-40%" } }}
-            />
-          </motion.div>
-        )}
+            variants={{ closed: { x: "100%" }, open: { x: "40%" } }}
+          />
+          <motion.div />
+          <motion.div
+            variants={{ closed: { x: "-100%" }, open: { x: "-40%" } }}
+          />
+        </motion.div>
+      )}
       <input type="text" />
       <button>does nothing</button>
     </Container>

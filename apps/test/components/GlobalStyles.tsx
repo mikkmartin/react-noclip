@@ -15,6 +15,16 @@ export const GlobalStyles = () => (
       :root {
         font-family: ${fontStack};
         font-size: 16px;
+        --background: transparent;
+        --foreground: #2d2d2d;
+      }
+      [data-theme="dark"] {
+        --background: #2d2d2d;
+        --foreground: transparent;
+      }
+      html {
+        background: var(--background);
+        color: var(--foreground);
       }
     `}
   />

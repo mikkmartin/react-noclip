@@ -219,6 +219,7 @@ export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
   const firstValue = formatValue(Object.keys(content)[0]);
   const [value, setValue] = React.useState(firstValue);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const container = React.useRef<HTMLDivElement | null>(null);
   const listRef = React.useRef(null);
   const [pages, setPages] = React.useState<string[]>([]);
   const isHome = pages.length === 0;
@@ -282,8 +283,25 @@ export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
       );
     });
 
+  function bounce() {
+    if (!container.current) return;
+    container.current.style.transform = "scale(0.96)";
+    setTimeout(() => {
+      if (container.current) {
+        container.current.style.transform = "";
+      }
+    }, 100);
+  }
+
   return (
-    <Command value={value} onValueChange={setValue}>
+    <Command
+      value={value}
+      ref={container}
+      onValueChange={setValue}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === "Enter") bounce();
+      }}
+    >
       {isHome && (
         <Input ref={inputRef} autoFocus placeholder="Type a command..." />
       )}
