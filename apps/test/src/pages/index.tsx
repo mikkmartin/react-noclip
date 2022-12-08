@@ -64,7 +64,9 @@ function renderStep(step: number, onAction: () => void) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
-          <button onClick={onAction} disabled={input.length < 20}>Next step</button>
+          <button onClick={onAction} disabled={input.length < 20}>
+            Next step
+          </button>
         </motion.div>
       );
     case 2:
@@ -95,13 +97,8 @@ const Container = styled(motion.div)`
   margin-top: 15vh;
   padding: 2rem;
   max-width: 400px;
-  background: #f0f1f3;
+  background: var(--bg);
+  color: var(--fg);
   overflow: hidden;
   position: relative;
-  ${({ theme }) =>
-    theme === "dark" &&
-    css`
-      background: ${theme === "dark" ? "#1f1f1f" : "#f0f1f3"};
-      color: ${theme === "dark" ? "#f0f1f3" : "#1f1f1f"};
-    `}
 `;
