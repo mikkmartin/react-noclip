@@ -3,66 +3,105 @@ import { useNoclip } from "react-noclip";
 import { AnimatePresence, motion } from "framer-motion";
 import styled from "@emotion/styled";
 import { useTheme } from "next-themes";
+import { css } from "@emotion/react";
+import { usePrevious } from "react-use";
+
+const steps = 6;
+const snappy = { type: "spring", stiffness: 500, damping: 40 };
 
 export default function Docs() {
-  const [showHeader, setShowHeader] = useState(true);
   const [key, setKey] = useState(0);
-  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(1);
   const { theme, setTheme } = useTheme();
+  const prevStep = usePrevious(step);
 
   useNoclip({
-    toggleAnimation: () => setShowHeader(!showHeader),
     restartAnimation: () => setKey(key + 1),
-    toggleOpen: () => setOpen(!open),
+    previousStep: () => setStep(step % steps === 1 ? step : step - 1),
+    nextStep: () => setStep(step % steps === steps - 1 ? step : step + 1),
     toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
   });
 
   return (
-    <Container>
-      {showHeader && (
+    <Container layout {...animations} theme={theme} key={key}>
+      <AnimatePresence initial={false} mode="popLayout" custom={step}>
         <motion.div
-          animate={open ? "open" : "closed"}
-          className="animation-container"
-          key={key}
+          layout
+          key={step}
+          initial="initial"
+          animate="in"
+          exit="exit"
+          transition={{ ...snappy, duration: 0.1 }}
+          variants={{
+            initial: { x: prevStep! < step ? 50 : -50, opacity: 0 },
+            in: { x: 0, opacity: 1 },
+            exit: (_step) => ({ x: _step < step ? 50 : -50, opacity: 0 }),
+          }}
         >
-          <motion.div
-            variants={{ closed: { x: "100%" }, open: { x: "40%" } }}
-          />
-          <motion.div />
-          <motion.div
-            variants={{ closed: { x: "-100%" }, open: { x: "-40%" } }}
-          />
+          {renderStep(step, () => setStep(step + 1))}
         </motion.div>
-      )}
-      <input type="text" />
-      <button>does nothing</button>
+      </AnimatePresence>
     </Container>
   );
 }
 
-const Container = styled.div`
+function renderStep(step: number, onAction: () => void) {
+  const [input, setInput] = useState("");
+
+  switch (step) {
+    case 1:
+      return (
+        <motion.div
+          style={{ display: "flex", flexDirection: "column", gap: 8 }}
+        >
+          <h1>Step one.</h1>
+          <p>
+            Some input that you have to fill, but want to skip in the
+            dev/testing stage.
+          </p>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button onClick={onAction} disabled={input.length < 20}>Next step</button>
+        </motion.div>
+      );
+    case 2:
+      return <h1>You made it to step two!</h1>;
+    case 3:
+      return <h1>Three</h1>;
+    case 4:
+      return <h1>Four</h1>;
+    case 5:
+      return <h1>Five</h1>;
+    case 6:
+      return <h1>Six</h1>;
+  }
+}
+
+const animations = {
+  initial: { opacity: 0, scale: 0.9, borderRadius: 20 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { ...snappy, opacity: { duration: 0.2 } },
+};
+
+const Container = styled(motion.div)`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   gap: 10px;
-  padding: 10rem;
-  .animation-container {
-    display: flex;
-    div {
-      width: 100px;
-      height: 100px;
-      border-radius: 100%;
-      mix-blend-mode: screen;
-      &:nth-of-type(1) {
-        background: red;
-      }
-      &:nth-of-type(2) {
-        background: #00ff00;
-      }
-      &:nth-of-type(3) {
-        background: blue;
-      }
-    }
-  }
+  margin: auto;
+  margin-top: 15vh;
+  padding: 2rem;
+  max-width: 400px;
+  background: #f0f1f3;
+  overflow: hidden;
+  position: relative;
+  ${({ theme }) =>
+    theme === "dark" &&
+    css`
+      background: ${theme === "dark" ? "#1f1f1f" : "#f0f1f3"};
+      color: ${theme === "dark" ? "#f0f1f3" : "#1f1f1f"};
+    `}
 `;

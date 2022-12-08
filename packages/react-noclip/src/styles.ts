@@ -6,7 +6,7 @@ export const styleVars = css`
   }
   --font-sans: "Inter", --apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
     Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  --app-bg: var(--gray1);
+  --bg: var(--gray1);
   --cmdk-shadow: 0 16px 70px rgb(0 0 0 / 20%);
 
   --lowContrast: #ffffff;

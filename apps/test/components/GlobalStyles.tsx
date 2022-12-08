@@ -15,12 +15,12 @@ export const GlobalStyles = () => (
       :root {
         font-family: ${fontStack};
         font-size: 16px;
-        --background: transparent;
-        --foreground: #2d2d2d;
+        --fg: #000;
+        --bg: #eaeaea;
       }
       [data-theme="dark"] {
-        --background: #2d2d2d;
-        --foreground: transparent;
+        --fg: #eaeaea;
+        --bg: #000;
       }
       html {
         background: var(--background);
