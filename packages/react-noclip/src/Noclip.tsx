@@ -452,7 +452,6 @@ const List = styled(CommandBase.List)`
 `;
 
 const ItemBase = styled(CommandBase.Item)`
-  content-visibility: auto;
   display: flex;
   justify-content: space-between;
 
@@ -515,6 +514,7 @@ function SubCommand({
     () => assignedShortcuts && !assigningShortucts,
     [assigningShortucts]
   );
+  const [error, setError] = React.useState("");
 
   const { shortcuts, setShortcuts } = useNoclipContext();
   const shortcut = shortcuts?.[commands.title];
@@ -580,11 +580,15 @@ function SubCommand({
           break;
       }
       if (hasModifierKey() && e.key.length === 1) {
-        setShortcutKeys((s) => {
-          const shortcut = s + e.key;
-          setShortcuts({ ...shortcuts, [commands.title]: shortcut });
-          return shortcut;
-        });
+        const { key } = e;
+        const keyCombo = shortcutKeys + key;
+        // if (shortcuts && Object.values(shortcuts).includes(keyCombo)) return console.error('exits')
+        if (shortcuts && Object.values(shortcuts).includes(keyCombo)) {
+          setError("Shortcut already exists");
+          return;
+        }
+        setShortcutKeys(keyCombo);
+        setShortcuts({ ...shortcuts, [commands.title]: keyCombo });
         setAssigningShortuts(false);
       }
     }
@@ -603,6 +607,12 @@ function SubCommand({
       document.removeEventListener("keyup", upListener);
     };
   }, [assigningShortucts, shortcutKeys]);
+
+  React.useEffect(() => {
+    if (!error) return;
+    const timeout = setTimeout(() => setError(""), 2000);
+    return () => clearTimeout(timeout);
+  }, [error]);
 
   function removeShortcut() {
     const newShortcuts = { ...shortcuts };
@@ -659,19 +669,21 @@ function SubCommand({
                       {assigningShortucts ? (
                         <>
                           <span>Recoding keys...</span>
-                          {shortcutKeys.length ? (
-                            <KeyGroup>
-                              {shortcutKeys.split("").map((key) => (
-                                <kbd key={key}>{key}</kbd>
-                              ))}
-                            </KeyGroup>
-                          ) : (
-                            <KeyGroup dimmed>
-                              eg. <kbd>⌘</kbd>
-                              <kbd>⇧</kbd>
-                              <kbd>E</kbd>
-                            </KeyGroup>
-                          )}
+                          <KeyError error={error}>
+                            {shortcutKeys.length ? (
+                              <KeyGroup>
+                                {shortcutKeys.split("").map((key) => (
+                                  <kbd key={key}>{key}</kbd>
+                                ))}
+                              </KeyGroup>
+                            ) : (
+                              <KeyGroup dimmed>
+                                eg. <kbd>⌘</kbd>
+                                <kbd>⇧</kbd>
+                                <kbd>E</kbd>
+                              </KeyGroup>
+                            )}
+                          </KeyError>
                         </>
                       ) : (
                         <>
@@ -770,4 +782,49 @@ const SubInput = styled(Input)`
   border-top: 1px solid var(--gray6);
   border-bottom: none;
   font-size: 13px;
+`;
+
+function KeyError({
+  children,
+  error,
+}: {
+  children: React.ReactNode;
+  error: string;
+}) {
+  return (
+    <Popover.Root open={Boolean(error)}>
+      <Popover.Anchor>{children}</Popover.Anchor>
+      <ErrorContent
+        side="top"
+        sideOffset={10}
+        alignOffset={-10}
+        align="end"
+        onOpenAutoFocus={(ev) => ev.preventDefault()}
+      >
+        <span>{error}</span>
+      </ErrorContent>
+    </Popover.Root>
+  );
+}
+
+const ErrorContent = styled(Popover.Content)`
+  color: tomato;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #ffc6bc;
+  animation: blinker 1s linear;
+  @keyframes blinker {
+    0% {
+      background-color: red;
+      color: white;
+    }
+    3% {
+      background-color: var(--gray1);
+    }
+    100% {
+      color: tomato;
+    }
+  }
 `;
