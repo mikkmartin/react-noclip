@@ -76,7 +76,7 @@ function renderStep(step: number, onAction: () => void) {
 }
 
 const animations = {
-  initial: { opacity: 0, scale: 0.9, borderRadius: 20 },
+  initial: { opacity: 0, scale: 0.8, borderRadius: 20 },
   animate: { opacity: 1, scale: 1 },
   transition: { ...snappy, opacity: { duration: 0.2 } },
 };
