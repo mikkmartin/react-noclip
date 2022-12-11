@@ -1,13 +1,12 @@
+import { css } from "@emotion/react";
 import styled from "@emotion/styled";
+import * as Dialog from "@radix-ui/react-dialog";
 import * as Popover from "@radix-ui/react-popover";
 import { Command as CommandBase } from "cmdk";
 import * as React from "react";
+import { useNoclipContext } from "./NoclipContext";
 import { styleVars } from "./styles";
-import * as Dialog from "@radix-ui/react-dialog";
 import { useAttributeChange } from "./utils/useAttributeChange";
-import { css } from "@emotion/react";
-import useLocalStorage from "./utils/useLocalStorage";
-import { LOCALSTORAGE_SHORTCUTS } from "./utils/constants";
 import usePrevious from "./utils/usePrevious";
 
 type OnSubmit = (value: { [key: string]: string }) => void;
@@ -23,11 +22,6 @@ export type Content = {
 
 type ModalProps = {
   content: Content;
-  shortcuts: [
-    { [key: string]: string } | undefined,
-    React.Dispatch<React.SetStateAction<{ [key: string]: string } | undefined>>,
-    () => void
-  ];
 };
 
 function FormView({ form, onBack }: { form: Form; onBack: Function }) {
@@ -194,8 +188,7 @@ function IconChevron() {
 type SubCommands = {
   title: string;
   actions: {
-    runAction: () => void;
-    assignShortcut: (keyCombination: string | null) => any;
+    [key: string]: () => void;
   };
 };
 
@@ -215,7 +208,7 @@ const Item = React.forwardRef<
   return <ItemBase {...props} ref={_ref} />;
 });
 
-export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
+export function Noclip({ content }: ModalProps) {
   const firstValue = formatValue(Object.keys(content)[0]);
   const [value, setValue] = React.useState(firstValue);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -226,12 +219,11 @@ export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
 
   const [title, setTitle] = React.useState<string>();
   const [subCommands, setSubCommands] = React.useState<SubCommands>();
+  const { shortcuts } = useNoclipContext();
 
   React.useEffect(() => {
     inputRef?.current?.focus();
   }, []);
-
-  const [shortcuts, setShortcuts] = _shortcuts;
 
   const renderContent = () =>
     Object.keys(content).map((key) => {
@@ -251,17 +243,6 @@ export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
               title: key,
               actions: {
                 runAction: () => action(),
-                assignShortcut: (shortcut: string | null) => {
-                  if (!shortcut) {
-                    setShortcuts((s) => {
-                      const shortcuts = { ...s };
-                      if (shortcuts && shortcuts[key]) delete shortcuts[key];
-                      return shortcuts;
-                    });
-                  } else {
-                    setShortcuts((s) => ({ ...s, [key]: shortcut }));
-                  }
-                },
               },
             });
           }}
@@ -342,7 +323,6 @@ export function Noclip({ content, shortcuts: _shortcuts }: ModalProps) {
         </button>
         {subCommands && (
           <SubCommand
-            shortcut={shortcuts && shortcuts[subCommands.title]}
             listRef={listRef}
             inputRef={inputRef}
             commands={subCommands}
@@ -522,9 +502,7 @@ function SubCommand({
   inputRef,
   listRef,
   commands,
-  shortcut,
 }: {
-  shortcut?: string;
   inputRef: React.RefObject<HTMLInputElement>;
   listRef: React.RefObject<HTMLElement>;
   commands: SubCommands;
@@ -538,8 +516,12 @@ function SubCommand({
     [assigningShortucts]
   );
 
+  const { shortcuts, setShortcuts } = useNoclipContext();
+  const shortcut = shortcuts?.[commands.title];
+
   React.useEffect(() => {
-    setShortcutKeys(shortcut || "");
+    if (shortcut) setShortcutKeys(shortcut);
+    else setShortcutKeys("");
   }, [shortcut]);
 
   React.useEffect(() => {
@@ -600,7 +582,7 @@ function SubCommand({
       if (hasModifierKey() && e.key.length === 1) {
         setShortcutKeys((s) => {
           const shortcut = s + e.key;
-          commands.actions.assignShortcut(shortcut);
+          setShortcuts({ ...shortcuts, [commands.title]: shortcut });
           return shortcut;
         });
         setAssigningShortuts(false);
@@ -623,13 +605,20 @@ function SubCommand({
   }, [assigningShortucts, shortcutKeys]);
 
   function removeShortcut() {
-    commands.actions.assignShortcut(null);
+    const newShortcuts = { ...shortcuts };
+    delete newShortcuts[commands.title];
+    setShortcuts(newShortcuts);
     setShortcutKeys("");
   }
 
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (assigningShortucts) e.preventDefault();
   }
+
+  const actions = {
+    ...commands.actions,
+    assignShortcut: () => {},
+  };
 
   return (
     <Popover.Root open={open} modal>
@@ -656,7 +645,7 @@ function SubCommand({
         <SubCommandContainer>
           <List>
             <Group heading={commands?.title || ""}>
-              {Object.keys(commands.actions).map((key) => {
+              {Object.keys(actions).map((key) => {
                 if (key === "assignShortcut") {
                   return (
                     <SubItem
@@ -708,7 +697,7 @@ function SubCommand({
                     key={key}
                     onSelect={() => {
                       //@ts-ignore
-                      commands.actions[key]();
+                      actions[key]();
                       setOpen(false);
                     }}
                   >

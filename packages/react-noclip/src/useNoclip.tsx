@@ -5,6 +5,7 @@ import createCache, { EmotionCache } from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { Dialog } from "./Dialog";
 import { useAssignShortcuts } from "./utils/useAssignShortcuts";
+import { NoclipProvider } from "./NoclipContext";
 
 export function useNoclip(content: Content) {
   const mountedRef = useRef<boolean>(false);
@@ -13,7 +14,7 @@ export function useNoclip(content: Content) {
   const domNodeRef = useRef<HTMLDivElement>();
   const mountPointRef = useRef<ShadowRoot>();
 
-  const stortcutState = useAssignShortcuts(content);
+  const [shortcuts, setShortcuts] = useAssignShortcuts(content);
 
   function mount() {
     mountedRef.current = true;
@@ -36,9 +37,11 @@ export function useNoclip(content: Content) {
     if (!cacheRef.current) return;
     rootNodeRef.current.render(
       <CacheProvider value={cacheRef.current}>
-        <Dialog open={mountedRef.current} onUnmount={unmount}>
-          <Noclip content={content} shortcuts={stortcutState} />
-        </Dialog>
+        <NoclipProvider shortcuts={shortcuts} setShortcuts={setShortcuts}>
+          <Dialog open={mountedRef.current} onUnmount={unmount}>
+            <Noclip content={content} />
+          </Dialog>
+        </NoclipProvider>
       </CacheProvider>
     );
   }
@@ -59,5 +62,5 @@ export function useNoclip(content: Content) {
     if (mountedRef.current) render();
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [content]);
+  }, [content, shortcuts]);
 }
