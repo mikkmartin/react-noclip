@@ -3,10 +3,9 @@ import { useNoclip } from "react-noclip";
 import { AnimatePresence, motion } from "framer-motion";
 import styled from "@emotion/styled";
 import { useTheme } from "next-themes";
-import { css } from "@emotion/react";
 import { usePrevious } from "react-use";
 
-const steps = 6;
+const steps = 4;
 const snappy = { type: "spring", stiffness: 500, damping: 40 };
 
 export default function Docs() {
@@ -72,13 +71,7 @@ function renderStep(step: number, onAction: () => void) {
     case 2:
       return <h1>You made it to step two!</h1>;
     case 3:
-      return <h1>Three</h1>;
-    case 4:
-      return <h1>Four</h1>;
-    case 5:
-      return <h1>Five</h1>;
-    case 6:
-      return <h1>Six</h1>;
+      return <h1>All done!</h1>;
   }
 }
 

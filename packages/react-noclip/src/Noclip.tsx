@@ -526,6 +526,7 @@ function SubCommand({
 
   React.useEffect(() => {
     function listener(e: KeyboardEvent) {
+      if (assigningShortucts) return
       if (e.key === "k" && e.metaKey) {
         e.preventDefault();
         setOpen((o) => !o);
@@ -535,7 +536,7 @@ function SubCommand({
     return () => {
       document.removeEventListener("keydown", listener);
     };
-  }, []);
+  }, [assigningShortucts]);
 
   React.useEffect(() => {
     const el = listRef.current;
@@ -582,8 +583,10 @@ function SubCommand({
       if (hasModifierKey() && e.key.length === 1) {
         const { key } = e;
         const keyCombo = shortcutKeys + key;
-        // if (shortcuts && Object.values(shortcuts).includes(keyCombo)) return console.error('exits')
-        if (shortcuts && Object.values(shortcuts).includes(keyCombo)) {
+        if (
+          (shortcuts && Object.values(shortcuts).includes(keyCombo)) ||
+          keyCombo === "⌘k"
+        ) {
           setError("Shortcut already exists");
           return;
         }
@@ -610,9 +613,10 @@ function SubCommand({
 
   React.useEffect(() => {
     if (!error) return;
+    if (!open) setError('')
     const timeout = setTimeout(() => setError(""), 2000);
     return () => clearTimeout(timeout);
-  }, [error]);
+  }, [error, open]);
 
   function removeShortcut() {
     const newShortcuts = { ...shortcuts };
