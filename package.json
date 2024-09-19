@@ -1,5 +1,6 @@
 {
   "private": true,
+  "name": "react-noclip",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --no-cache --parallel --continue",
@@ -11,11 +12,11 @@
     "release": "turbo run build --filter=docs^... && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.25.2",
-    "eslint": "^8.28.0",
+    "@changesets/cli": "^2.27.8",
+    "eslint": "^9.10.0",
     "eslint-config-noclip": "workspace:*",
-    "prettier": "^2.8.0",
-    "turbo": "^1.6.3"
+    "prettier": "^3.3.3",
+    "turbo": "^2.1.2"
   },
   "packageManager": "pnpm@7.15.0"
 }

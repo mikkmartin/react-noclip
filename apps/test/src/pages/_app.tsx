@@ -1,7 +1,7 @@
 import { AppProps } from "next/app";
-import { GlobalStyles } from "components/GlobalStyles";
 import Head from "next/head";
 import { ThemeProvider } from "next-themes";
+import { GlobalStyles } from '../../components/GlobalStyles'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
