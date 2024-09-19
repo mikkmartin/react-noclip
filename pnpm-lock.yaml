@@ -93,22 +93,22 @@ importers:
   packages/react-noclip:
     dependencies:
       '@emotion/cache':
-        specifier: ^11.10.5
+        specifier: ^11.13.1
         version: 11.13.1
       '@emotion/react':
-        specifier: ^11.10.5
+        specifier: ^11.13.3
         version: 11.13.3(@types/react@18.3.7)(react@18.3.1)
       '@emotion/styled':
-        specifier: ^11.10.5
+        specifier: ^11.13.0
         version: 11.13.0(@emotion/react@11.13.3(@types/react@18.3.7)(react@18.3.1))(@types/react@18.3.7)(react@18.3.1)
       '@radix-ui/react-dialog':
-        specifier: ^1.0.2
+        specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-popover':
-        specifier: ^1.0.2
+        specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       cmdk:
-        specifier: ^0.1.20
+        specifier: ^1.0.0
         version: 1.0.0(@types/react-dom@18.3.0)(@types/react@18.3.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^16.8 || ^17.0 || ^18.0
@@ -121,22 +121,22 @@ importers:
         specifier: workspace:*
         version: link:../noclip-tsconfig
       '@types/react':
-        specifier: ^18.0.25
+        specifier: ^18.3.7
         version: 18.3.7
       '@types/react-dom':
-        specifier: ^18.0.9
+        specifier: ^18.3.0
         version: 18.3.0
       eslint:
-        specifier: ^8.28.0
+        specifier: ^9.10.0
         version: 9.10.0
       eslint-config-noclip:
         specifier: workspace:*
         version: link:../eslint-config-acme
       tsup:
-        specifier: ^6.5.0
+        specifier: ^8.3.0
         version: 8.3.0(postcss@8.4.47)(typescript@5.6.2)
       typescript:
-        specifier: ^4.9.3
+        specifier: ^5.6.2
         version: 5.6.2
 
 packages:
