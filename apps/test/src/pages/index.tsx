@@ -19,6 +19,20 @@ export default function Docs() {
     previousStep: () => setStep(step % steps === 1 ? step : step - 1),
     nextStep: () => setStep(step % steps === steps - 1 ? step : step + 1),
     toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
+    uploadFile: {
+      file: "file-picker",
+      date: "text-input",
+      title: "text-input",
+      description: "text-area",
+      onSubmit: async (values) => {
+        //console.log(values)
+        if (values.file) {
+          const file = values.file as unknown as File;
+          const blob = new Blob([file], { type: file.type });
+          console.log(blob);
+        }
+      }
+    }
   });
 
   return (

@@ -8,11 +8,12 @@ import { useNoclipContext } from "./NoclipContext";
 import { styleVars } from "./styles";
 import { useAttributeChange } from "./utils/useAttributeChange";
 import usePrevious from "./utils/usePrevious";
+import { FilePicker } from "./components/FileUpload";
 
 type OnSubmit = (value: { [key: string]: string }) => void;
 
 type Form = {
-  [key: string]: "text-area" | "text-input" | OnSubmit | undefined;
+  [key: string]: "text-area" | "text-input" | "file-picker" | OnSubmit | undefined;
   onSubmit?: OnSubmit;
 };
 
@@ -85,6 +86,15 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
                 </React.Fragment>
               );
             }
+            if (form[key] === "file-picker") {
+              return (
+                <React.Fragment key={key}>
+                  <label>{key}</label>
+                  <FilePicker id={key} />
+                  <div />
+                </React.Fragment>
+              );
+            }
             return null;
           })}
         </FormContainer>
@@ -106,7 +116,7 @@ const FormContainer = styled.form`
     font-size: 12px;
     color: var(--gray11);
     line-height: 32px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.2px;
     &::first-letter {
       text-transform: uppercase;
     }
