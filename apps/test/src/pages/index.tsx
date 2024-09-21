@@ -23,6 +23,7 @@ export default function Docs() {
       file: "file-picker",
       date: "text-input",
       title: "text-input",
+      temp: 'file-picker',
       description: "text-area",
       onSubmit: async (values) => {
         //console.log(values)

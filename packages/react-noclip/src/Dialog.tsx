@@ -26,4 +26,5 @@ const Container = styled(Content)`
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--gray11);
+  z-index: 99999;
 `;
