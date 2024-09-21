@@ -91,7 +91,7 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
                 <React.Fragment key={key}>
                   <label>{key}</label>
                   <FilePicker id={key} />
-                  <div />
+                  <span />
                 </React.Fragment>
               );
             }
