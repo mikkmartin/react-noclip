@@ -10,10 +10,17 @@ import { useAttributeChange } from "./utils/useAttributeChange";
 import usePrevious from "./utils/usePrevious";
 import { FilePicker } from "./components/FileUpload";
 
+const formInputs = ["text-area", "text-input", "file-picker"];
+
 type OnSubmit = (value: { [key: string]: string }) => void;
+type MenuObject =
+  | (typeof formInputs)[number]
+  | OnSubmit
+  | undefined
+  | { [key: string]: MenuObject };
 
 type Form = {
-  [key: string]: "text-area" | "text-input" | "file-picker" | OnSubmit | undefined;
+  [key: string]: MenuObject;
   onSubmit?: OnSubmit;
 };
 
@@ -226,16 +233,28 @@ export function Noclip({ content }: ModalProps) {
   const listRef = React.useRef(null);
   const [pages, setPages] = React.useState<string[]>([]);
   const isHome = pages.length === 0;
+  const lastPage = pages[pages.length - 1];
 
   const [title, setTitle] = React.useState<string>();
   const [subCommands, setSubCommands] = React.useState<SubCommands>();
   const { shortcuts } = useNoclipContext();
 
+  const currentContent: Content = isHome
+    ? content
+    : (getNestedValue(content, pages) as Content);
+
   React.useEffect(() => {
     inputRef?.current?.focus();
   }, []);
 
-  const renderContent = () =>
+  function isFormObject(obj: Object) {
+    return (
+      obj.hasOwnProperty("onSubmit") ||
+      Object.keys(obj).some((str) => formInputs.includes(str))
+    );
+  }
+
+  const renderContent = (content: Content) =>
     Object.keys(content).map((key) => {
       const value = formatValue(key);
       const action: Function =
@@ -257,6 +276,7 @@ export function Noclip({ content }: ModalProps) {
             });
           }}
           onSelect={() => {
+            console.log("select", value);
             setTitle(value);
             action();
           }}
@@ -284,6 +304,14 @@ export function Noclip({ content }: ModalProps) {
     }, 100);
   }
 
+  const popPage = () => {
+    setPages((pages) => {
+      const x = [...pages];
+      x.splice(-1, 1);
+      return x;
+    });
+  };
+
   return (
     <Command
       value={value}
@@ -291,31 +319,35 @@ export function Noclip({ content }: ModalProps) {
       onValueChange={setValue}
       onKeyDown={(e: React.KeyboardEvent) => {
         if (e.key === "Enter") bounce();
+        if (isHome || inputRef.current?.value.length) {
+          return;
+        }
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          popPage();
+          bounce();
+        }
       }}
     >
-      {isHome && (
+      {isHome || !isFormObject(currentContent) ? (
         <Input ref={inputRef} autoFocus placeholder="Type a command..." />
-      )}
-      {!isHome && (
+      ) : (
         <BackHeader
           onClick={() => setPages(pages.slice(0, -1))}
           title={title}
         />
       )}
       <List ref={listRef}>
-        {isHome && (
+        {!isFormObject(currentContent) ? (
           <>
             <Empty>No results found.</Empty>
-            {renderContent()}
+            {renderContent(currentContent)}
           </>
-        )}
-        {!isHome && (
-          <>
-            <FormView
-              form={content[pages[0]] as Form}
-              onBack={() => setPages(pages.slice(0, -1))}
-            />
-          </>
+        ) : (
+          <FormView
+            form={currentContent as Form}
+            onBack={() => setPages(pages.slice(0, -1))}
+          />
         )}
       </List>
 
@@ -536,7 +568,7 @@ function SubCommand({
 
   React.useEffect(() => {
     function listener(e: KeyboardEvent) {
-      if (assigningShortucts) return
+      if (assigningShortucts) return;
       if (e.key === "k" && e.metaKey) {
         e.preventDefault();
         setOpen((o) => !o);
@@ -623,7 +655,7 @@ function SubCommand({
 
   React.useEffect(() => {
     if (!error) return;
-    if (!open) setError('')
+    if (!open) setError("");
     const timeout = setTimeout(() => setError(""), 2000);
     return () => clearTimeout(timeout);
   }, [error, open]);
@@ -842,3 +874,8 @@ const ErrorContent = styled(Popover.Content)`
     }
   }
 `;
+
+function getNestedValue(obj: Object, path: string[]) {
+  //@ts-ignore
+  return path.reduce((acc, key) => acc && acc[key], obj);
+}

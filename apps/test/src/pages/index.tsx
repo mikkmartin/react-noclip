@@ -15,6 +15,15 @@ export default function Docs() {
   const prevStep = usePrevious(step);
 
   useNoclip({
+    someNesting: {
+      test: () => console.log("test"),
+      test2: () => console.log("test2"),
+      nestedForm: {
+        test: "text-input",
+        test2: "text-input",
+        onSubmit: console.log,
+      },
+    },
     restartAnimation: () => setKey(key + 1),
     previousStep: () => setStep(step % steps === 1 ? step : step - 1),
     nextStep: () => setStep(step % steps === steps - 1 ? step : step + 1),
@@ -23,7 +32,7 @@ export default function Docs() {
       file: "file-picker",
       date: "text-input",
       title: "text-input",
-      temp: 'file-picker',
+      temp: "file-picker",
       description: "text-area",
       onSubmit: async (values) => {
         //console.log(values)
@@ -32,8 +41,8 @@ export default function Docs() {
           const blob = new Blob([file], { type: file.type });
           console.log(blob);
         }
-      }
-    }
+      },
+    },
   });
 
   return (
