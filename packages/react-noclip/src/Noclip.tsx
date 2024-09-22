@@ -10,22 +10,28 @@ import { useAttributeChange } from "./utils/useAttributeChange";
 import usePrevious from "./utils/usePrevious";
 import { FilePicker } from "./components/FileUpload";
 
-const formInputs = ["text-area", "text-input", "file-picker"];
+const formInputs = ["text-area", "text-input", "file-picker"] as const;
 
 type OnSubmit = (value: { [key: string]: string }) => void;
+type Actions = { [key: string]: Function };
+
 type MenuObject =
   | (typeof formInputs)[number]
+  | { actions: Actions }
+  | { [key: string]: MenuObject }
   | OnSubmit
-  | undefined
-  | { [key: string]: MenuObject };
+  | undefined;
 
 type Form = {
-  [key: string]: MenuObject;
+  [key: string]: MenuObject | Actions;
+  actions?: Actions;
   onSubmit?: OnSubmit;
 };
 
+type Action = Function | { type: "action"; actions: Actions };
+
 export type Content = {
-  [key: string]: Function | Form;
+  [key: string]: Action | Form;
 };
 
 type ModalProps = {
@@ -204,9 +210,7 @@ function IconChevron() {
 
 type SubCommands = {
   title: string;
-  actions: {
-    [key: string]: () => void;
-  };
+  actions: Actions;
 };
 
 function formatValue(value: string) {
@@ -233,7 +237,6 @@ export function Noclip({ content }: ModalProps) {
   const listRef = React.useRef(null);
   const [pages, setPages] = React.useState<string[]>([]);
   const isHome = pages.length === 0;
-  const lastPage = pages[pages.length - 1];
 
   const [title, setTitle] = React.useState<string>();
   const [subCommands, setSubCommands] = React.useState<SubCommands>();
@@ -247,10 +250,10 @@ export function Noclip({ content }: ModalProps) {
     inputRef?.current?.focus();
   }, []);
 
-  function isFormObject(obj: Object) {
+  function checkIfForm(obj: Object) {
     return (
       obj.hasOwnProperty("onSubmit") ||
-      Object.keys(obj).some((str) => formInputs.includes(str))
+      formInputs.some((key) => Object.values(obj).includes(key))
     );
   }
 
@@ -262,21 +265,33 @@ export function Noclip({ content }: ModalProps) {
           ? (content[key] as Function)
           : () => setPages([...pages, key]);
 
+      const subObject = content[key];
+      const isForm = typeof subObject === "object";
+
       return (
         <Item
           key={key}
           value={value}
           onActive={(active) => {
             if (active !== "true") return;
-            setSubCommands({
+            const commands: SubCommands = {
               title: key,
               actions: {
                 runAction: () => action(),
               },
-            });
+            };
+            if (
+              Object.keys(subObject).includes("actions") &&
+              typeof subObject !== "function"
+            ) {
+              commands.actions = {
+                ...commands.actions,
+                ...(subObject.actions ?? {}),
+              };
+            }
+            setSubCommands(commands);
           }}
           onSelect={() => {
-            console.log("select", value);
             setTitle(value);
             action();
           }}
@@ -312,6 +327,8 @@ export function Noclip({ content }: ModalProps) {
     });
   };
 
+  const isFormObject = checkIfForm(currentContent);
+
   return (
     <Command
       value={value}
@@ -329,7 +346,7 @@ export function Noclip({ content }: ModalProps) {
         }
       }}
     >
-      {isHome || !isFormObject(currentContent) ? (
+      {isHome || !isFormObject ? (
         <Input ref={inputRef} autoFocus placeholder="Type a command..." />
       ) : (
         <BackHeader
@@ -338,7 +355,7 @@ export function Noclip({ content }: ModalProps) {
         />
       )}
       <List ref={listRef}>
-        {!isFormObject(currentContent) ? (
+        {!isFormObject ? (
           <>
             <Empty>No results found.</Empty>
             {renderContent(currentContent)}
@@ -353,7 +370,7 @@ export function Noclip({ content }: ModalProps) {
 
       <Footer>
         <button>
-          {pages.length === 0 ? "Run action" : "Submit form"}
+          {!isFormObject ? "Run action" : "Submit form"}
           {pages.length === 0 ? (
             <kbd>↵</kbd>
           ) : (
