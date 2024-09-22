@@ -55,7 +55,10 @@ export function useNoclip(content: Content) {
   }
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "k" && (e.metaKey || e.ctrlKey) && !mountedRef.current) mount();
+    if (e.key === "k" && (e.metaKey || e.ctrlKey) && !mountedRef.current) {
+      e.preventDefault();
+      mount()
+    };
   };
 
   useEffect(() => {
