@@ -65,6 +65,7 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
       const formData = new FormData(formRef.current);
       const values = Object.keys(form).reduce((acc, key) => {
         if (typeof form[key] === "function") return acc;
+        if (key === "actions") return acc;
         return { ...acc, [key]: formData.get(key) };
       }, {});
       if (form.onSubmit) {

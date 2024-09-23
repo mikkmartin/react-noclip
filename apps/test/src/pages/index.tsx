@@ -22,6 +22,7 @@ export default function Docs() {
         value: "initial value",
       },
       test3: "text-area",
+      onSubmit: (val) => console.log(val),
     },
     someNesting: {
       test: () => console.log("test"),
