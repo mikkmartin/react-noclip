@@ -15,11 +15,22 @@ export default function Docs() {
   const prevStep = usePrevious(step);
 
   useNoclip({
+    prefilledForm: {
+      test: "text-input",
+      test2: {
+        type: "text-input",
+        value: "initial value",
+      },
+      test3: "text-area",
+    },
     someNesting: {
       test: () => console.log("test"),
       test2: () => console.log("test2"),
       nestedForm: {
-        test: "text-input",
+        test: {
+          type: "text-input",
+          value: "initial value",
+        },
         test2: "text-input",
         onSubmit: console.log,
       },

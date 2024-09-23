@@ -15,23 +15,40 @@ const formInputs = ["text-area", "text-input", "file-picker"] as const;
 type OnSubmit = (value: { [key: string]: string }) => void;
 type Actions = { [key: string]: Function };
 
-type MenuObject =
-  | (typeof formInputs)[number]
-  | { actions: Actions }
-  | { [key: string]: MenuObject }
-  | OnSubmit
-  | undefined;
-
+type FormInput = "text-area" | "text-input" | "file-picker";
 type Form = {
-  [key: string]: MenuObject | Actions;
+  [key: string]:
+    | FormInput
+    | {
+        type: FormInput;
+        value?: string;
+      }
+    | Actions
+    | OnSubmit
+    | undefined;
   actions?: Actions;
   onSubmit?: OnSubmit;
 };
 
+function isFormInput(
+  value: any,
+  inputType: FormInput
+): value is { type: FormInput; value?: string } {
+  return (
+    (typeof value === "object" &&
+      value !== null &&
+      "type" in value &&
+      value.type === inputType) ||
+    value === inputType
+  );
+}
+
 type Action = Function | { type: "action"; actions: Actions };
 
+type MenuObject = Form | Action | { [key: string]: MenuObject };
+
 export type Content = {
-  [key: string]: Action | Form;
+  [key: string]: MenuObject;
 };
 
 type ModalProps = {
@@ -80,21 +97,21 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
         onInteractOutside={(ev) => ev.preventDefault()}
       >
         <FormContainer ref={formRef}>
-          {Object.keys(form).map((key) => {
-            if (form[key] === "text-area") {
+          {Object.entries(form).map(([key, value]) => {
+            if (isFormInput(value, "text-area")) {
               return (
                 <React.Fragment key={key}>
                   <label>{key}</label>
-                  <textarea name={key} />
+                  <textarea name={key} defaultValue={value.value} />
                   <div />
                 </React.Fragment>
               );
             }
-            if (form[key] === "text-input") {
+            if (isFormInput(value, "text-input")) {
               return (
                 <React.Fragment key={key}>
                   <label>{key}</label>
-                  <input name={key} />
+                  <input name={key} defaultValue={value.value} />
                   <div />
                 </React.Fragment>
               );
@@ -284,9 +301,10 @@ export function Noclip({ content }: ModalProps) {
               Object.keys(subObject).includes("actions") &&
               typeof subObject !== "function"
             ) {
+              const actions = (subObject.actions as Actions) ?? {};
               commands.actions = {
                 ...commands.actions,
-                ...(subObject.actions ?? {}),
+                ...actions,
               };
             }
             setSubCommands(commands);
@@ -339,7 +357,7 @@ export function Noclip({ content }: ModalProps) {
         if (isHome || inputRef.current?.value.length) {
           return;
         }
-        if (e.key === "Backspace") {
+        if (e.key === "Backspace" && !isFormObject) {
           e.preventDefault();
           popPage();
           bounce();
