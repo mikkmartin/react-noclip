@@ -72,12 +72,15 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
       e.preventDefault();
       if (!formRef.current) return;
       const formData = new FormData(formRef.current);
-      console.log(formData);
       const values = Object.keys(form).reduce((acc, key) => {
         if (typeof form[key] === "function") return acc;
         if (key === "actions") return acc;
         const value = formData.get(key);
-        if (form[key] === "checkbox") return { ...acc, [key]: Boolean(value) };
+        if (
+          form[key] === "checkbox" ||
+          (typeof form[key] === "object" && form[key].type === "checkbox")
+        )
+          return { ...acc, [key]: Boolean(value) };
         return { ...acc, [key]: formData.get(key) };
       }, {});
       if (form.onSubmit) {
@@ -152,8 +155,6 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
                     : false
                   : undefined
               ) as boolean | undefined;
-
-              console.log({ key, value, defaultValue });
               return (
                 <React.Fragment key={key}>
                   <label>{key}</label>
@@ -545,7 +546,7 @@ const ItemBase = styled(CommandBase.Item)`
     text-transform: uppercase;
   }
 
-  span:nth-child(2) {
+  span:nth-of-type(2) {
     color: var(--gray9);
   }
 
