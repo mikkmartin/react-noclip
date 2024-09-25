@@ -1,8 +1,8 @@
-import { FileIcon } from 'lucide-react'
-import { FileUpload } from '@ark-ui/react'
-import styled from '@emotion/styled'
+import { FileIcon } from "lucide-react";
+import { FileUpload } from "@ark-ui/react";
+import styled from "@emotion/styled";
 
-export const FilePicker = ({id}: {id?: string}) => {
+export const FilePicker = ({ id }: { id?: string }) => {
   return (
     <Root maxFiles={1}>
       <FileUpload.Dropzone>
@@ -29,8 +29,8 @@ export const FilePicker = ({id}: {id?: string}) => {
       </FileUpload.ItemGroup>
       <FileUpload.HiddenInput id={id} name={id} />
     </Root>
-  )
-}
+  );
+};
 
 const Root = styled(FileUpload.Root)`
   [aria-label="dropzone"] {
@@ -71,7 +71,7 @@ const Root = styled(FileUpload.Root)`
       color: var(--gray11);
       line-height: 32px;
       letter-spacing: 0.2px;
-      div:nth-child(1) {
+      div:nth-of-type(1) {
         flex: 1;
         padding: 4px;
         display: flex;
@@ -83,10 +83,10 @@ const Root = styled(FileUpload.Root)`
           width: 18px;
         }
       }
-      div:nth-child(2) {
+      div:nth-of-type(2) {
         flex: 6;
       }
-      div:nth-child(3) {
+      div:nth-of-type(3) {
         flex: auto;
         text-align: right;
       }
@@ -104,4 +104,4 @@ const Root = styled(FileUpload.Root)`
       display: none;
     }
   }
-`
+`;
