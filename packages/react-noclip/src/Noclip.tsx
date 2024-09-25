@@ -9,31 +9,40 @@ import { styleVars } from "./styles";
 import { useAttributeChange } from "./utils/useAttributeChange";
 import usePrevious from "./utils/usePrevious";
 import { FilePicker } from "./components/FileUpload";
+import { Checkbox } from "./components/Checkbox";
+import { Button } from "./components/Button";
 
-const formInputs = ["text-area", "text-input", "file-picker"] as const;
+const formInputs = [
+  "text-area",
+  "text-input",
+  "file-picker",
+  "checkbox",
+] as const;
 
 type OnSubmit = (value: { [key: string]: string }) => void;
 type Actions = { [key: string]: Function };
 
-type FormInput = "text-area" | "text-input" | "file-picker";
+type TextInput = "text-area" | "text-input" | "file-picker";
+type BoolInput = "checkbox";
+type InputType = TextInput | BoolInput;
+type FormInput =
+  | InputType
+  | {
+      type: TextInput;
+      value?: string;
+    }
+  | {
+      type: BoolInput;
+      value?: boolean;
+    };
+
 type Form = {
-  [key: string]:
-    | FormInput
-    | {
-        type: FormInput;
-        value?: string;
-      }
-    | Actions
-    | OnSubmit
-    | undefined;
+  [key: string]: FormInput | Actions | OnSubmit | undefined;
   actions?: Actions;
   onSubmit?: OnSubmit;
 };
 
-function isFormInput(
-  value: any,
-  inputType: FormInput
-): value is { type: FormInput; value?: string } {
+function isFormInput(value: any, inputType?: InputType): value is FormInput {
   return (
     (typeof value === "object" &&
       value !== null &&
@@ -63,9 +72,12 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
       e.preventDefault();
       if (!formRef.current) return;
       const formData = new FormData(formRef.current);
+      console.log(formData);
       const values = Object.keys(form).reduce((acc, key) => {
         if (typeof form[key] === "function") return acc;
         if (key === "actions") return acc;
+        const value = formData.get(key);
+        if (form[key] === "checkbox") return { ...acc, [key]: Boolean(value) };
         return { ...acc, [key]: formData.get(key) };
       }, {});
       if (form.onSubmit) {
@@ -100,19 +112,25 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
         <FormContainer ref={formRef}>
           {Object.entries(form).map(([key, value]) => {
             if (isFormInput(value, "text-area")) {
+              const defaultValue = (
+                typeof value === "string" ? value : value.value
+              ) as string | undefined;
               return (
                 <React.Fragment key={key}>
                   <label>{key}</label>
-                  <textarea name={key} defaultValue={value.value} />
+                  <textarea name={key} defaultValue={defaultValue} />
                   <div />
                 </React.Fragment>
               );
             }
             if (isFormInput(value, "text-input")) {
+              const defaultValue = (
+                typeof value === "string" ? value : value.value
+              ) as string | undefined;
               return (
                 <React.Fragment key={key}>
                   <label>{key}</label>
-                  <input name={key} defaultValue={value.value} />
+                  <input name={key} defaultValue={defaultValue} />
                   <div />
                 </React.Fragment>
               );
@@ -122,6 +140,24 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
                 <React.Fragment key={key}>
                   <label>{key}</label>
                   <FilePicker id={key} />
+                  <div />
+                </React.Fragment>
+              );
+            }
+            if (isFormInput(value, "checkbox")) {
+              const defaultValue = (
+                typeof value === "object"
+                  ? value.value
+                    ? true
+                    : false
+                  : undefined
+              ) as boolean | undefined;
+
+              console.log({ key, value, defaultValue });
+              return (
+                <React.Fragment key={key}>
+                  <label>{key}</label>
+                  <Checkbox id={key} name={key} defaultChecked={defaultValue} />
                   <div />
                 </React.Fragment>
               );
@@ -169,9 +205,9 @@ const FormContainer = styled.form`
 function BackHeader({ onClick, title }: any) {
   return (
     <StyledBackHeader>
-      <button onClick={onClick}>
+      <Button variant="back-button" onClick={onClick}>
         <IconChevron />
-      </button>
+      </Button>
       <span>{title}</span>
     </StyledBackHeader>
   );
@@ -184,21 +220,6 @@ const StyledBackHeader = styled.div`
   padding-left: 8px;
   align-items: center;
   gap: 4px;
-  button {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    &:hover {
-      background: var(--gray2);
-      color: black;
-      border-radius: 8px;
-    }
-    svg {
-      display: block;
-    }
-  }
   span {
     color: var(--gray11);
     margin-bottom: 1px;
@@ -284,7 +305,6 @@ export function Noclip({ content }: ModalProps) {
           : () => setPages([...pages, key]);
 
       const subObject = content[key];
-      const isForm = typeof subObject === "object";
 
       return (
         <Item
@@ -388,7 +408,7 @@ export function Noclip({ content }: ModalProps) {
       </List>
 
       <Footer>
-        <button>
+        <Button>
           {!isFormObject ? "Run action" : "Submit form"}
           {pages.length === 0 ? (
             <kbd>↵</kbd>
@@ -398,7 +418,7 @@ export function Noclip({ content }: ModalProps) {
               <kbd>↵</kbd>
             </>
           )}
-        </button>
+        </Button>
         {subCommands && (
           <SubCommand
             listRef={listRef}
@@ -421,14 +441,6 @@ const Command = styled(CommandBase)`
   font-family: var(--font-sans);
   box-shadow: var(--cmdk-shadow);
   transition: transform 100ms ease;
-
-  button {
-    font-family: inherit;
-    background: none;
-    border: 0;
-    color: var(--gray11);
-    cursor: pointer;
-  }
 
   kbd {
     font-family: var(--font-sans);
@@ -476,24 +488,6 @@ const Footer = styled.div`
   padding: 4px 8px;
   border-top: 1px solid var(--gray6);
   border-radius: 0 0 12px 12px;
-  button {
-    padding: 0 4px 0 8px;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 12px;
-    height: 28px;
-    letter-spacing: -0.25px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-
-    &[aria-expanded="true"],
-    &:hover {
-      background: var(--gray4);
-    }
-  }
 `;
 
 const Group = styled(CommandBase.Group)`
@@ -714,11 +708,13 @@ function SubCommand({
 
   return (
     <Popover.Root open={open} modal>
-      <Popover.Trigger onClick={() => setOpen(true)} aria-expanded={open}>
-        Actions
-        <kbd>⌘</kbd>
-        <kbd>K</kbd>
-      </Popover.Trigger>
+      <Button asChild>
+        <Popover.Trigger onClick={() => setOpen(true)} aria-expanded={open}>
+          Actions
+          <kbd>⌘</kbd>
+          <kbd>K</kbd>
+        </Popover.Trigger>
+      </Button>
       <Popover.Content
         side="top"
         align="end"

@@ -8,54 +8,93 @@ import { usePrevious } from "react-use";
 const steps = 4;
 const snappy = { type: "spring", stiffness: 500, damping: 40 };
 
+export type Item = {
+  description?: string;
+  date: string;
+  slug: string;
+  id: string;
+  url?: string;
+  deletedAt?: string;
+};
+
 export default function Docs() {
   const [key, setKey] = useState(0);
   const [step, setStep] = useState(1);
   const { theme, setTheme } = useTheme();
   const prevStep = usePrevious(step);
-
-  useNoclip({
-    prefilledForm: {
-      test: "text-input",
-      test2: {
-        type: "text-input",
-        value: "initial value",
-      },
-      test3: "text-area",
-      onSubmit: (val) => console.log(val),
-    },
-    someNesting: {
-      test: () => console.log("test"),
-      test2: () => console.log("test2"),
-      nestedForm: {
-        test: {
+  useNoclip(
+    {
+      editItem: {
+        slug: {
           type: "text-input",
-          value: "initial value",
+          value: "test",
         },
-        test2: "text-input",
-        onSubmit: console.log,
+        public: "checkbox",
+        preChecked: {
+          type: "checkbox",
+          value: true,
+        },
+        description: "text-area",
+        onSubmit: (val) => console.log(val),
+        // public: "checkbox",
       },
-    },
-    restartAnimation: () => setKey(key + 1),
-    previousStep: () => setStep(step % steps === 1 ? step : step - 1),
-    nextStep: () => setStep(step % steps === steps - 1 ? step : step + 1),
-    toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
-    uploadFile: {
-      file: "file-picker",
-      date: "text-input",
-      title: "text-input",
-      temp: "file-picker",
-      description: "text-area",
-      onSubmit: async (values) => {
-        //console.log(values)
-        if (values.file) {
-          const file = values.file as unknown as File;
-          const blob = new Blob([file], { type: file.type });
-          console.log(blob);
-        }
-      },
-    },
-  });
+    }
+    // editItem: Object.fromEntries(
+    //   items.map((item) => [
+    //     item.slug,
+    //     {
+    //       slug: {
+    //         type: "text-input",
+    //         value: item.slug,
+    //       },
+    //     },
+    //   ])
+    // ),
+    // }
+  );
+
+  // useNoclip({
+  //   prefilledForm: {
+  //     test: "text-input",
+  //     test2: {
+  //       type: "text-input",
+  //       value: "initial value",
+  //     },
+  //     test3: "text-area",
+  //     onSubmit: (val) => console.log(val),
+  //   },
+  //   someNesting: {
+  //     test: () => console.log("test"),
+  //     test2: () => console.log("test2"),
+  //     nestedForm: {
+  //       test: {
+  //         type: "text-input",
+  //         value: "initial value",
+  //       },
+  //       test2: "text-input",
+  //       onSubmit: console.log,
+  //     },
+  //   },
+  //   restartAnimation: () => setKey(key + 1),
+  //   previousStep: () => setStep(step % steps === 1 ? step : step - 1),
+  //   nextStep: () => setStep(step % steps === steps - 1 ? step : step + 1),
+  //   toggleTheme: () => setTheme(theme === "dark" ? "light" : "dark"),
+  //   uploadFile: {
+  //     file: "file-picker",
+  //     date: "text-input",
+  //     title: "text-input",
+  //     temp: "file-picker",
+  //     description: "text-area",
+  //     onSubmit: async (values) => {
+  //       //console.log(values)
+  //       if (values.file) {
+  //         const file = values.file as unknown as File;
+  //         const blob = new Blob([file], { type: file.type });
+  //         console.log(blob);
+  //       }
+  //     },
+  //   },
+  // });
 
   return (
     <Container layout {...animations} theme={theme} key={key}>

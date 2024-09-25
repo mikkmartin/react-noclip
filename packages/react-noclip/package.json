@@ -32,9 +32,12 @@
     "@emotion/cache": "^11.13.1",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@radix-ui/react-checkbox": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-slot": "^1.1.0",
     "cmdk": "^1.0.0",
+    "cva": "1.0.0-beta.1",
     "lucide-react": "^0.441.0"
   },
   "peerDependencies": {
