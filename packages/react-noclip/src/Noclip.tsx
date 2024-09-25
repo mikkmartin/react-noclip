@@ -116,7 +116,7 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
           {Object.entries(form).map(([key, value]) => {
             if (isFormInput(value, "text-area")) {
               const defaultValue = (
-                typeof value === "string" ? value : value.value
+                typeof value === "object" ? value.value : undefined
               ) as string | undefined;
               return (
                 <React.Fragment key={key}>
@@ -128,7 +128,7 @@ function FormView({ form, onBack }: { form: Form; onBack: Function }) {
             }
             if (isFormInput(value, "text-input")) {
               const defaultValue = (
-                typeof value === "string" ? value : value.value
+                typeof value === "object" ? value.value : undefined
               ) as string | undefined;
               return (
                 <React.Fragment key={key}>

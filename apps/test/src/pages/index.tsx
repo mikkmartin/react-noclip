@@ -25,6 +25,7 @@ export default function Docs() {
   useNoclip(
     {
       editItem: {
+        textField: "text-area",
         slug: {
           type: "text-input",
           value: "test",
