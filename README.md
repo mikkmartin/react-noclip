@@ -11,3 +11,5 @@ useNoclip({
   toggleTitle: () => setShowTitle(!showTitle),
 });
 ```
+
+Opens with ⌘+k
